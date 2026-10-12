@@ -11,8 +11,8 @@
             <Border
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="0"
-                Background="{DynamicResource Brush50}"
-                CornerRadius="5">
+                Background="{DynamicResource ControlBrush}"
+                CornerRadius="7">
                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
@@ -62,8 +62,8 @@
             <ComboBox.Template>
                 <ControlTemplate TargetType="ComboBox">
                     <Border BorderThickness="1"
-                            CornerRadius="5"
-                            BorderBrush="{DynamicResource Brush400}"
+                            CornerRadius="7"
+                            BorderBrush="{DynamicResource AccentBrush}"
                             Name="border">
                         <Grid>
                             <ToggleButton Name="toggleButton" 
@@ -99,17 +99,18 @@
                                    PopupAnimation="Slide">
                                 <Border x:Name="dropDownBorder"
                                         Width="{Binding ElementName=MyComboBox, Path=ActualWidth}"
-                                        BorderBrush="{DynamicResource Brush400}"
+                                        BorderBrush="{DynamicResource ControlBorderBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="5"
-                                        Background="{DynamicResource Brush50}">
+                                        CornerRadius="7"
+                                        Padding="3"
+                                        Background="{DynamicResource CardBrush}">
                                     <ScrollViewer>
                                         <ScrollViewer.Resources>
                                             <Style x:Key="ScrollBarThumb" TargetType="Thumb">
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="Thumb">
-                                                            <Border x:Name="borderThumb" Background="{DynamicResource Brush950}" CornerRadius="5"/>
+                                                            <Border x:Name="borderThumb" Background="{DynamicResource Brush350}" CornerRadius="3" Margin="2"/>
                                                         </ControlTemplate>
                                                     </Setter.Value>
                                                 </Setter>
@@ -156,8 +157,8 @@
                                 <Condition Property="Text" Value="" />
                             </MultiTrigger.Conditions>
                             <MultiTrigger.Setters>
-                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
-                                <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource Brush700}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+                                <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                             </MultiTrigger.Setters>
                             <MultiTrigger.EnterActions>
                                 <BeginStoryboard>
@@ -204,13 +205,13 @@
                                 <Condition Property="IsDropDownOpen" Value="False" />
                             </MultiTrigger.Conditions>
                             <MultiTrigger.Setters>
-                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
-                                <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource Brush700}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+                                <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                             </MultiTrigger.Setters>
                         </MultiTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Trigger.Setters>
-                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush800}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
                             </Trigger.Setters>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -243,17 +244,17 @@
                                 <Border x:Name="Bd" 
                                         Background="{TemplateBinding Background}"
                                         BorderBrush="{TemplateBinding BorderBrush}"
-                                        CornerRadius="5"
+                                        CornerRadius="7"
                                         Padding="4"
                                         BorderThickness="{TemplateBinding BorderThickness}">
                                     <ContentPresenter VerticalAlignment="Center" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush100}" />
+                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}" />
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush300}" />
+                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

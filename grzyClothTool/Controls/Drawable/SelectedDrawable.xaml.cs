@@ -1056,6 +1056,28 @@ namespace grzyClothTool.Controls
             SelectedDraw.ChangeDrawableType(newValue.ToString());
         }
 
+        private void ClothTypeComponent_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeClothType(false);
+        }
+
+        private void ClothTypeProp_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeClothType(true);
+        }
+
+        private void ChangeClothType(bool toProp)
+        {
+            var drawable = SelectedDraw;
+            if (drawable == null || drawable.IsReserved || drawable.IsProp == toProp)
+            {
+                return;
+            }
+
+            drawable.ChangeDrawableKind(toProp);
+            LogHelper.Log($"Changed '{drawable.Name}' to {(toProp ? "prop" : "component")} ({drawable.TypeName}). Pick the exact type from Drawable Type if needed.", LogType.Info);
+        }
+
         private void DrawableSex_Changed(object sender, UpdatedEventArgs e)
         {
             if (!e.IsUserInitiated)
@@ -1585,7 +1607,7 @@ namespace grzyClothTool.Controls
 
             if (isTextures)
             {
-                texturesTab.BorderBrush = (System.Windows.Media.Brush)FindResource("Brush500");
+                texturesTab.BorderBrush = (System.Windows.Media.Brush)FindResource("AccentBrush");
                 embeddedTexturesTab.BorderBrush = System.Windows.Media.Brushes.Transparent;
 
                 texturesContent.Visibility = Visibility.Visible;
@@ -1595,7 +1617,7 @@ namespace grzyClothTool.Controls
             }
             else
             {
-                embeddedTexturesTab.BorderBrush = (System.Windows.Media.Brush)FindResource("Brush500");
+                embeddedTexturesTab.BorderBrush = (System.Windows.Media.Brush)FindResource("AccentBrush");
                 texturesTab.BorderBrush = System.Windows.Media.Brushes.Transparent;
 
                 texturesContent.Visibility = Visibility.Collapsed;

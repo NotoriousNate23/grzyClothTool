@@ -19,9 +19,9 @@
             <ControlTemplate TargetType="RadioButton">
                 <Border x:Name="border"
                         Height="40"
-                        CornerRadius="5"
-                        Background="{DynamicResource Brush50}"
-                        BorderBrush="{DynamicResource Brush400}"
+                        CornerRadius="7"
+                        Background="{DynamicResource ControlBrush}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -48,7 +48,7 @@
                         <Setter TargetName="Indicator" Property="Fill" Value="{DynamicResource Brush950}"/>
                     </Trigger>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush800}"/>
+                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}"/>
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>

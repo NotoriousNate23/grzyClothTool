@@ -203,12 +203,62 @@ namespace grzyClothTool.Views
             await SelectDrawableFilesAsync(Enums.SexType.male);
         }
 
-        private async Task SelectDrawableFilesAsync(Enums.SexType? forcedGender)
+        private void AddMenuButton_Click(object sender, RoutedEventArgs e)
         {
+            if (sender is FrameworkElement element && element.ContextMenu != null)
+            {
+                element.ContextMenu.PlacementTarget = element;
+                element.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                element.ContextMenu.IsOpen = true;
+            }
+            e.Handled = true;
+        }
+
+        private async void Add_MaleComponents(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.male, false);
+        }
+
+        private async void Add_MaleProps(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.male, true);
+        }
+
+        private async void Add_FemaleComponents(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.female, false);
+        }
+
+        private async void Add_FemaleProps(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.female, true);
+        }
+
+        private static string GetKindDisplayName(bool isProp)
+        {
+            return isProp ? "Props" : "Components";
+        }
+
+        private async Task SelectDrawableFilesAsync(Enums.SexType? forcedGender, bool? forcedIsProp = null)
+        {
+            var titleParts = new List<string>();
+            if (forcedGender.HasValue)
+            {
+                titleParts.Add(GetGenderDisplayName(forcedGender.Value));
+            }
+            if (forcedIsProp.HasValue)
+            {
+                titleParts.Add(GetKindDisplayName(forcedIsProp.Value));
+            }
+
             OpenFileDialog files = new()
             {
-                Title = forcedGender.HasValue
-                    ? $"Select drawable files ({GetGenderDisplayName(forcedGender.Value)})"
+                Title = titleParts.Count > 0
+                    ? $"Select drawable files ({string.Join(" · ", titleParts)})"
                     : "Select drawable files",
                 Filter = "Drawable files (*.ydd)|*.ydd",
                 Multiselect = true
@@ -219,7 +269,7 @@ namespace grzyClothTool.Views
                 return;
             }
 
-            await AddDrawablesByDetectedGenderAsync(files.FileNames, forcedGender);
+            await AddDrawablesByDetectedGenderAsync(files.FileNames, forcedGender, forcedIsProp);
         }
 
         private async void Add_DrawableAutoFolder(object sender, RoutedEventArgs e)
@@ -297,7 +347,7 @@ namespace grzyClothTool.Views
             }
         }
 
-        private static async Task AddDrawablesByDetectedGenderAsync(IEnumerable<string> filePaths, Enums.SexType? forcedGender = null)
+        private static async Task AddDrawablesByDetectedGenderAsync(IEnumerable<string> filePaths, Enums.SexType? forcedGender = null, bool? forcedIsProp = null)
         {
             var files = filePaths.Distinct().ToList();
             if (files.Count == 0)
@@ -305,7 +355,7 @@ namespace grzyClothTool.Views
                 return;
             }
 
-            var resolution = ResolveDrawableImport(files, forcedGender);
+            var resolution = ResolveDrawableImport(files, forcedGender, forcedIsProp);
             if (resolution == null)
             {
                 LogHelper.Log("Adding drawables cancelled while resolving import settings.", LogType.Info);
@@ -364,15 +414,27 @@ namespace grzyClothTool.Views
             return gender == Enums.SexType.male ? "Male" : "Female";
         }
 
-        private static DrawableImportResolution ResolveDrawableImport(IEnumerable<string> files, Enums.SexType? forcedGender)
+        private static DrawableImportResolution ResolveDrawableImport(IEnumerable<string> files, Enums.SexType? forcedGender, bool? forcedIsProp = null)
         {
             var fileList = files.ToList();
             var detectedGenders = fileList.ToDictionary(
                 file => file,
                 file => forcedGender ?? DetermineGenderFromFilename(file));
+
+            // When the user explicitly picked Component or Prop, a file name that implies the
+            // other kind is ignored and the file is sent to the resolver, preset to the chosen kind.
             var detectedDrawableTypes = fileList.ToDictionary(
                 file => file,
-                file => FileHelper.TryResolveDrawableTypeFromFileName(file));
+                file =>
+                {
+                    (bool IsProp, int DrawableType)? detected = FileHelper.TryResolveDrawableTypeFromFileName(file);
+                    if (forcedIsProp.HasValue && detected.HasValue && detected.Value.IsProp != forcedIsProp.Value)
+                    {
+                        return ((bool IsProp, int DrawableType)?)null;
+                    }
+
+                    return detected;
+                });
 
             var needsGender = !forcedGender.HasValue && detectedGenders.Values.Any(x => !x.HasValue);
             var needsDrawableProperties = detectedDrawableTypes.Values.Any(x => !x.HasValue);
@@ -391,7 +453,8 @@ namespace grzyClothTool.Views
                 detectedGenders,
                 detectedDrawableTypes,
                 needsGender,
-                needsDrawableProperties)
+                needsDrawableProperties,
+                forcedIsProp.HasValue ? (forcedIsProp.Value ? "Prop" : "Component") : null)
             {
                 Owner = System.Windows.Application.Current.MainWindow
             };

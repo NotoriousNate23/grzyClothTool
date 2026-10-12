@@ -49,18 +49,18 @@
         </Style>
 
         <Style TargetType="Border" x:Key="ModernCard">
-            <Setter Property="Background" Value="{DynamicResource Brush50}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush200}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="16" />
             <Setter Property="Margin" Value="8" />
         </Style>
 
         <Style TargetType="TextBlock" x:Key="SectionTitle">
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush950}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
 
@@ -109,7 +109,7 @@
         </Style>
 
         <DataTemplate x:Key="NoDrawableTemplate">
-            <Grid Background="{DynamicResource Brush50}" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid Background="{DynamicResource CanvasBrush}" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40">
                     <icons:MaterialIcon Kind="FileDocumentOutline" 
                                        Width="64" 
@@ -135,7 +135,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ReservedDrawableTemplate">
-            <Grid Background="{DynamicResource Brush50}">
+            <Grid Background="{DynamicResource CanvasBrush}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="250" />
@@ -146,13 +146,13 @@
                         <icons:MaterialIcon Kind="Lock" 
                                            Width="64" 
                                            Height="64"
-                                           Foreground="#f59e0b"
+                                           Foreground="{DynamicResource WarningBrush}"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,16" />
                         <TextBlock Text="Reserved Drawable"
                                    FontSize="18"
                                    FontWeight="Bold"
-                                   Foreground="#f59e0b"
+                                   Foreground="{DynamicResource WarningBrush}"
                                    HorizontalAlignment="Center"
                                    Margin="0,0,0,12" />
                         <TextBlock Text="This is a reserved drawable slot and cannot be edited."
@@ -198,7 +198,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="DrawableOptionsTemplate">
-            <Grid Background="{DynamicResource Brush100}">
+            <Grid Background="{DynamicResource CanvasBrush}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="250" />
@@ -266,7 +266,7 @@
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Content" Value="Force Override" />
-                                    <Setter Property="Background" Value="#3b82f6" />
+                                    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
                                     <Setter Property="Foreground" Value="White" />
                                     <Setter Property="Cursor" Value="Hand" />
                                     <Setter Property="Template">
@@ -279,10 +279,10 @@
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#2563eb"/>
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsPressed" Value="True">
-                                                        <Setter Property="Background" Value="#1d4ed8"/>
+                                                        <Setter Property="Background" Value="{DynamicResource AccentPressedBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -538,7 +538,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ModernDrawableTemplate">
-            <Grid Background="{DynamicResource Brush100}">
+            <Grid Background="{DynamicResource CanvasBrush}">
                 <Grid.Style>
                     <Style TargetType="Grid">
                         <Setter Property="Visibility" Value="Visible" />
@@ -590,6 +590,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <c:ModernLabelTextBox Grid.Column="0"
@@ -599,7 +600,29 @@
                                 Margin="0,0,8,0" 
                                 IsUpdated="SelectedDrawable_Updated"/>
 
-                                <c:ModernLabelComboBox Grid.Column="1"
+                                <!-- Cloth type: Component / Prop -->
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource SegmentedTrack}"
+                                        Height="40"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        ToolTip="Cloth type. Components (jbib, lowr, feet…) are worn as clothing; props (p_head, p_eyes…) are attached accessories."
+                                        ToolTipService.InitialShowDelay="400">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource SegmentButton}"
+                                                Content="Component"
+                                                AutomationProperties.Name="Cloth type Component"
+                                                Tag="{Binding SelectedAddon.SelectedDrawable.IsComponent}"
+                                                Click="ClothTypeComponent_Click" />
+                                        <Button Style="{StaticResource SegmentButton}"
+                                                Content="Prop"
+                                                AutomationProperties.Name="Cloth type Prop"
+                                                Tag="{Binding SelectedAddon.SelectedDrawable.IsProp}"
+                                                Click="ClothTypeProp_Click" />
+                                    </StackPanel>
+                                </Border>
+
+                                <c:ModernLabelComboBox Grid.Column="2"
                                                       Width="150"
                                                       Label="Drawable Type" 
                                                       SelectedItem="{Binding SelectedAddon.SelectedDrawable.TypeName, Mode=TwoWay}" 
@@ -607,7 +630,7 @@
                                                       IsUpdated="DrawableType_Changed"
                                                       Margin="0,0,8,0" />
 
-                                <c:ModernLabelComboBox Grid.Column="2"
+                                <c:ModernLabelComboBox Grid.Column="3"
                                                       Width="120"
                                                       Label="Sex" 
                                                       SelectedItem="{Binding SelectedAddon.SelectedDrawable.SexName, Mode=TwoWay}" 
@@ -667,7 +690,7 @@
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Border x:Name="TexturesTab"
                                                     Background="Transparent"
-                                                    BorderBrush="{DynamicResource Brush500}"
+                                                    BorderBrush="{DynamicResource AccentBrush}"
                                                     BorderThickness="0,0,0,2"
                                                     Padding="16,8"
                                                     Cursor="Hand"
@@ -691,7 +714,7 @@
                                                     <icons:MaterialIcon Kind="AlertCircle" 
                                                                        Width="14" 
                                                                        Height="14" 
-                                                                       Foreground="#f59e0b"
+                                                                       Foreground="{DynamicResource WarningBrush}"
                                                                        Margin="6,0,0,0"
                                                                        ToolTip="At least one texture has warning"
                                                                        ToolTipService.InitialShowDelay="0">
@@ -725,7 +748,7 @@
                                                     <icons:MaterialIcon Kind="AlertCircle" 
                                                                        Width="14" 
                                                                        Height="14" 
-                                                                       Foreground="#f59e0b"
+                                                                       Foreground="{DynamicResource WarningBrush}"
                                                                        Margin="6,0,0,0"
                                                                        ToolTip="At least one embedded texture has warning"
                                                                        ToolTipService.InitialShowDelay="0">
@@ -852,7 +875,7 @@
                                                                 </ContentControl>
 
                                                                 <ContentControl ToolTip="{Binding TxtDetails.IsOptimizeNeededTooltip}" ToolTipService.InitialShowDelay="0">
-                                                                    <icons:MaterialIcon Kind="AlertCircle" Width="16" Height="16" Foreground="#f59e0b" Margin="0,0,2,0">
+                                                                    <icons:MaterialIcon Kind="AlertCircle" Width="16" Height="16" Foreground="{DynamicResource WarningBrush}" Margin="0,0,2,0">
                                                                         <icons:MaterialIcon.Style>
                                                                             <Style TargetType="{x:Type icons:MaterialIcon}">
                                                                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -975,7 +998,7 @@
                                                                 <ContextMenu>
                                                                     <MenuItem Click="HandleTextureOptimization_Click">
                                                                         <MenuItem.Style>
-                                                                            <Style TargetType="MenuItem">
+                                                                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                                                                 <Setter Property="Header" Value="Optimize texture" />
                                                                                 <Style.Triggers>
                                                                                     <DataTrigger Binding="{Binding IsOptimizedDuringBuild}" Value="True">
@@ -1096,7 +1119,7 @@
                                                                 </ContentControl>
 
                                                                 <ContentControl ToolTip="{Binding Details.IsOptimizeNeededTooltip}" ToolTipService.InitialShowDelay="0">
-                                                                    <icons:MaterialIcon Kind="AlertCircle" Width="16" Height="16" Foreground="#f59e0b" Margin="0,0,2,0">
+                                                                    <icons:MaterialIcon Kind="AlertCircle" Width="16" Height="16" Foreground="{DynamicResource WarningBrush}" Margin="0,0,2,0">
                                                                         <icons:MaterialIcon.Style>
                                                                             <Style TargetType="{x:Type icons:MaterialIcon}">
                                                                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -1115,7 +1138,7 @@
                                                                 </ContentControl>
 
                                                                 <ContentControl ToolTip="This is a replacement texture" ToolTipService.InitialShowDelay="0">
-                                                                    <icons:MaterialIcon Kind="SwapHorizontal" Width="16" Height="16" Foreground="#3b82f6" Margin="0,0,2,0">
+                                                                    <icons:MaterialIcon Kind="SwapHorizontal" Width="16" Height="16" Foreground="{DynamicResource AccentBrush}" Margin="0,0,2,0">
                                                                         <icons:MaterialIcon.Style>
                                                                             <Style TargetType="{x:Type icons:MaterialIcon}">
                                                                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -1234,7 +1257,7 @@
                                                                 <ContextMenu>
                                                                     <MenuItem Click="HandleEmbeddedTextureOptimization_Click">
                                                                         <MenuItem.Style>
-                                                                            <Style TargetType="MenuItem">
+                                                                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                                                                 <Setter Property="Header" Value="Optimize texture" />
                                                                                 <Style.Triggers>
                                                                                     <DataTrigger Binding="{Binding IsOptimizedDuringBuild}" Value="True">

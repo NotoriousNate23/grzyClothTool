@@ -187,7 +187,7 @@
                                             </Border>
                                             <DataTemplate.Triggers>
                                                 <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
-                                                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#3b82f6"/>
+                                                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                                     <Setter TargetName="ItemBorder" Property="BorderThickness" Value="1"/>
                                                     <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource Brush100}"/>
                                                 </DataTrigger>
@@ -199,7 +199,7 @@
                         </Border>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
-                                <Setter TargetName="GroupBorder" Property="BorderBrush" Value="#3b82f6"/>
+                                <Setter TargetName="GroupBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                 <Setter TargetName="GroupBorder" Property="BorderThickness" Value="2"/>
                             </DataTrigger>
                         </DataTemplate.Triggers>

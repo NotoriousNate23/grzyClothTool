@@ -1,22 +1,23 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace grzyClothTool.Controls
 {
     /// <summary>
-    /// Interaction logic for Button.xaml
+    /// Themed button with optional icon, label, visual variant and dropdown.
+    /// Variant: "Secondary" (default), "Primary", "Ghost", "Danger".
     /// </summary>
     public partial class CustomButton : UserControl
     {
         public static readonly DependencyProperty LabelProperty = DependencyProperty
-        .Register("Label",
+            .Register("Label",
                 typeof(string),
                 typeof(CustomButton),
                 new FrameworkPropertyMetadata(""));
 
         public static readonly DependencyProperty DropdownEnabledProperty = DependencyProperty
-        .Register("DropdownEnabled",
+            .Register("DropdownEnabled",
                 typeof(bool),
                 typeof(CustomButton),
                 new FrameworkPropertyMetadata(false));
@@ -34,13 +35,25 @@ namespace grzyClothTool.Controls
                 new FrameworkPropertyMetadata(null));
 
         public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty
-        .Register("CornerRadius",
+            .Register("CornerRadius",
                 typeof(CornerRadius),
                 typeof(CustomButton),
-                new FrameworkPropertyMetadata(new CornerRadius(0)));
+                new FrameworkPropertyMetadata(new CornerRadius(8)));
+
+        public static readonly DependencyProperty VariantProperty = DependencyProperty
+            .Register("Variant",
+                typeof(string),
+                typeof(CustomButton),
+                new FrameworkPropertyMetadata("Secondary"));
+
+        public static readonly DependencyProperty IconSizeProperty = DependencyProperty
+            .Register("IconSize",
+                typeof(double),
+                typeof(CustomButton),
+                new FrameworkPropertyMetadata(16.0));
 
         public new static readonly DependencyProperty FontSizeProperty = DependencyProperty
-            .Register("FontSize", typeof(double), typeof(CustomButton), new FrameworkPropertyMetadata(16.0));
+            .Register("FontSize", typeof(double), typeof(CustomButton), new FrameworkPropertyMetadata(13.0));
 
         public static readonly RoutedEvent BtnClickEvent = EventManager.RegisterRoutedEvent(
             "BtnClickEvent",
@@ -48,6 +61,13 @@ namespace grzyClothTool.Controls
             typeof(RoutedEventHandler),
             typeof(CustomButton)
         );
+
+        static CustomButton()
+        {
+            FontWeightProperty.OverrideMetadata(
+                typeof(CustomButton),
+                new FrameworkPropertyMetadata(FontWeights.Medium, FrameworkPropertyMetadataOptions.Inherits));
+        }
 
         public event RoutedEventHandler MyBtnClickEvent
         {
@@ -83,6 +103,18 @@ namespace grzyClothTool.Controls
         {
             get { return (CornerRadius)GetValue(CornerRadiusProperty); }
             set { SetValue(CornerRadiusProperty, value); }
+        }
+
+        public string Variant
+        {
+            get { return (string)GetValue(VariantProperty); }
+            set { SetValue(VariantProperty, value); }
+        }
+
+        public double IconSize
+        {
+            get { return (double)GetValue(IconSizeProperty); }
+            set { SetValue(IconSizeProperty, value); }
         }
 
         public new double FontSize

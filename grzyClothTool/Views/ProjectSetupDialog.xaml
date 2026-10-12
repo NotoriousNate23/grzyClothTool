@@ -125,7 +125,7 @@
                      BorderBrush="{DynamicResource Brush300}"
                      BorderThickness="1"/>
             
-            <Border Background="#fef3c7"
+            <Border Background="{DynamicResource WarningSubtleBrush}"
                     BorderBrush="#fcd34d"
                     BorderThickness="1"
                     CornerRadius="4"
@@ -148,8 +148,8 @@
         </StackPanel>
         
         <Border Grid.Row="2"
-                Background="#dbeafe"
-                BorderBrush="#93c5fd"
+                Background="{DynamicResource AccentSubtleBrush}"
+                BorderBrush="{DynamicResource AccentHoverBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
                 Padding="12,10"
@@ -158,11 +158,11 @@
             <StackPanel Orientation="Horizontal">
                 <icons:MaterialIcon Kind="Information" 
                                    Width="18" Height="18"
-                                   Foreground="#2563eb"
+                                   Foreground="{DynamicResource AccentBrush}"
                                    Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding DrawableCountMessage}"
                            FontSize="13"
-                           Foreground="#1e40af"/>
+                           Foreground="{DynamicResource AccentTextBrush}"/>
             </StackPanel>
         </Border>
         
@@ -211,7 +211,7 @@
         </StackPanel>
         
         <Border Grid.Row="4"
-                Background="#fef3c7"
+                Background="{DynamicResource WarningSubtleBrush}"
                 BorderBrush="#fcd34d"
                 BorderThickness="1"
                 CornerRadius="6"

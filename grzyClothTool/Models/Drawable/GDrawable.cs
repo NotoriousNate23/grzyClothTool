@@ -180,8 +180,26 @@ public class GDrawable : INotifyPropertyChanged
         }
     }
 
-    public bool IsProp { get; set; }
+    private bool _isProp;
+    public bool IsProp
+    {
+        get => _isProp;
+        set
+        {
+            if (_isProp != value)
+            {
+                _isProp = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsComponent));
+                OnPropertyChanged(nameof(KindName));
+            }
+        }
+    }
+
     public bool IsComponent => !IsProp;
+
+    [JsonIgnore]
+    public string KindName => IsProp ? "Prop" : "Component";
 
     private int _number;
     public int Number
@@ -626,6 +644,87 @@ public class GDrawable : INotifyPropertyChanged
         // re-add changed drawable
         MainWindow.AddonManager.AddDrawable(this);
         MainWindow.AddonManager.Addons.Sort(true);
+    }
+
+    /// <summary>
+    /// Converts this drawable between component and prop (DurtyCloth-style "cloth type").
+    /// The old slot is kept as a reserved placeholder so numbering of other drawables does not shift,
+    /// exactly like a type or sex change.
+    /// </summary>
+    public void ChangeDrawableKind(bool toProp, string? newType = null)
+    {
+        if (IsReserved || IsProp == toProp)
+        {
+            return;
+        }
+
+        var addon = MainWindow.AddonManager.Addons.FirstOrDefault(a => a.Drawables.Contains(this))
+                    ?? MainWindow.AddonManager.SelectedAddon;
+        var index = addon?.Drawables.IndexOf(this) ?? -1;
+        if (index < 0)
+        {
+            return;
+        }
+
+        var reserved = new GDrawableReserved(Sex, IsProp, TypeNumeric, Number);
+
+        DuplicateDetector.UnregisterDrawable(this);
+
+        var newTypeNumeric = !string.IsNullOrEmpty(newType)
+            ? EnumHelper.GetValue(newType, toProp)
+            : GetDefaultTypeForKind(toProp, TypeNumeric);
+
+        IsProp = toProp;
+        TypeNumeric = newTypeNumeric;
+        _typeName = null;
+
+        // Props have no skin variants (_u / _r)
+        if (toProp && _hasSkin)
+        {
+            _hasSkin = false;
+            OnPropertyChanged(nameof(HasSkin));
+        }
+
+        foreach (var txt in Textures)
+        {
+            txt.IsProp = toProp;
+            txt.HasSkin = _hasSkin;
+            txt.TypeNumeric = newTypeNumeric;
+        }
+
+        // keep the old slot so the numbers of following drawables do not change
+        addon!.Drawables[index] = reserved;
+
+        // re-add as the new kind (gets a fresh number for its new type)
+        MainWindow.AddonManager.AddDrawable(this);
+        MainWindow.AddonManager.Addons.Sort(true);
+
+        OnPropertyChanged(nameof(TypeName));
+        OnPropertyChanged(nameof(AvailableTypes));
+        OnPropertyChanged(nameof(AvailableAudioList));
+        SaveHelper.SetUnsavedChanges(true);
+    }
+
+    private static int GetDefaultTypeForKind(bool toProp, int currentTypeNumeric)
+    {
+        if (toProp)
+        {
+            return (Enums.ComponentNumbers)currentTypeNumeric switch
+            {
+                Enums.ComponentNumbers.teef => (int)Enums.PropNumbers.p_mouth,
+                Enums.ComponentNumbers.feet => (int)Enums.PropNumbers.p_lfoot,
+                _ => (int)Enums.PropNumbers.p_head,
+            };
+        }
+
+        return (Enums.PropNumbers)currentTypeNumeric switch
+        {
+            Enums.PropNumbers.p_head or Enums.PropNumbers.p_eyes or Enums.PropNumbers.p_ears => (int)Enums.ComponentNumbers.berd,
+            Enums.PropNumbers.p_mouth => (int)Enums.ComponentNumbers.teef,
+            Enums.PropNumbers.p_lhand or Enums.PropNumbers.p_rhand => (int)Enums.ComponentNumbers.hand,
+            Enums.PropNumbers.p_lfoot or Enums.PropNumbers.p_rfoot => (int)Enums.ComponentNumbers.feet,
+            _ => (int)Enums.ComponentNumbers.jbib,
+        };
     }
 
     public void ChangeDrawableSex(string newSex)

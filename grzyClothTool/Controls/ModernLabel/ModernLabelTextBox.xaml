@@ -26,10 +26,10 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="TextBox">
                             <Border BorderThickness="{TemplateBinding Border.BorderThickness}" 
-                                    BorderBrush="{DynamicResource Brush950}"
-                                    Background="{DynamicResource Brush50}"
+                                    BorderBrush="{DynamicResource AccentBrush}"
+                                    Background="{DynamicResource ControlBrush}"
                                     Name="border"
-                                    CornerRadius="5"
+                                    CornerRadius="7"
                                     SnapsToDevicePixels="True">
                                 <Grid>
                                     <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Name="PART_ContentHost" Focusable="False" />
@@ -45,8 +45,8 @@
                                         <Condition Property="Text" Value="" />
                                     </MultiTrigger.Conditions>
                                     <MultiTrigger.Setters>
-                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
-                                        <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource Brush700}" />
+                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+                                        <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                     </MultiTrigger.Setters>
                                     <MultiTrigger.EnterActions>
                                         <BeginStoryboard>
@@ -79,13 +79,13 @@
                                 </MultiTrigger>
                                 <Trigger Property="IsFocused" Value="False">
                                     <Trigger.Setters>
-                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
-                                        <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource Brush700}" />
+                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+                                        <Setter TargetName="placeholder" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                     </Trigger.Setters>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Trigger.Setters>
-                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush800}" />
+                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush400}" />
                                     </Trigger.Setters>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="false">

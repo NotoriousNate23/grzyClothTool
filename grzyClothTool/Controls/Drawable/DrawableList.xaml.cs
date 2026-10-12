@@ -478,6 +478,41 @@ namespace grzyClothTool.Controls
             }
         }
 
+        private void ToggleClothType_Click(object sender, RoutedEventArgs e)
+        {
+            if (DrawableListSelectedValue is not GDrawable drawable || drawable.IsReserved)
+            {
+                return;
+            }
+
+            drawable.ChangeDrawableKind(!drawable.IsProp);
+            LogHelper.Log($"Converted '{drawable.Name}' to {(drawable.IsProp ? "prop" : "component")}", Views.LogType.Info);
+        }
+
+        private void SetClothType_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem { Tag: string kind })
+            {
+                return;
+            }
+
+            var toProp = kind == "Prop";
+            var targets = MyListBox.SelectedItems
+                .OfType<GDrawable>()
+                .Where(d => !d.IsReserved && d.IsProp != toProp)
+                .ToList();
+
+            foreach (var drawable in targets)
+            {
+                drawable.ChangeDrawableKind(toProp);
+            }
+
+            if (targets.Count > 0)
+            {
+                LogHelper.Log($"Converted {targets.Count} drawable(s) to {(toProp ? "props" : "components")}", Views.LogType.Info);
+            }
+        }
+
         private void IgnoreWarnings_Click(object sender, RoutedEventArgs e)
         {
             if (DrawableListSelectedValue is not GDrawable drawable)

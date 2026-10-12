@@ -252,7 +252,8 @@ namespace grzyClothTool.Views
             Dictionary<string, Enums.SexType?> detectedGenders = null,
             Dictionary<string, (bool IsProp, int DrawableType)?> detectedDrawableTypes = null,
             bool showGender = false,
-            bool showDrawableProperties = true)
+            bool showDrawableProperties = true,
+            string presetAssetType = null)
         {
             InitializeComponent();
 
@@ -277,6 +278,13 @@ namespace grzyClothTool.Views
             }
 
             DataContext = this;
+
+            // Preset Component / Prop when the user already chose the kind before importing
+            if (_showDrawableProperties && (presetAssetType == "Component" || presetAssetType == "Prop"))
+            {
+                SelectedAssetType = presetAssetType;
+                SetDrawableTypeOptions(presetAssetType);
+            }
         }
 
         private void AssetType_IsUpdated(object sender, Controls.UpdatedEventArgs e)
