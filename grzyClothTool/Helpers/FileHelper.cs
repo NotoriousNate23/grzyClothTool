@@ -194,6 +194,13 @@ public static class FileHelper
         return fileName; // Return relative path
     }
 
+    public static async Task<string> WriteBytesToProjectAssetsAsync(byte[] bytes, string fileName)
+    {
+        var destinationPath = Path.Combine(GetProjectAssetsPath(), fileName);
+        await File.WriteAllBytesAsync(destinationPath, bytes);
+        return fileName; // Return relative path
+    }
+
     public static async Task<string> CopyToProjectAssetsWithReplaceAsync(string sourceFilePath, string fileNameWithoutExtension)
     {
         var assetsPath = GetProjectAssetsPath();

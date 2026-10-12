@@ -659,25 +659,8 @@ namespace grzyClothTool.Controls
                         break;
                     }
 
-                    string texturePath;
                     var textureGuid = Guid.NewGuid();
-                    
-                    if (isExternal)
-                    {
-                        texturePath = file;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            texturePath = await FileHelper.CopyToProjectAssetsAsync(file, textureGuid.ToString());
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.Log($"Failed to copy texture to project assets: {ex.Message}. Using original path.", LogType.Warning);
-                            texturePath = file;
-                        }
-                    }
+                    string texturePath = await PrepareTexturePathAsync(file, textureGuid, sel, sel.Textures.Count, isExternal);
                     
                     var gtxt = new GTexture(textureGuid, texturePath, sel.TypeNumeric, sel.Number, sel.Textures.Count, sel.HasSkin, sel.IsProp);
                     gtxt.LoadThumbnailAsync();
@@ -938,25 +921,8 @@ namespace grzyClothTool.Controls
                         break;
                     }
 
-                    string texturePath;
                     var textureGuid = Guid.NewGuid();
-                    
-                    if (isExternal)
-                    {
-                        texturePath = file;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            texturePath = await FileHelper.CopyToProjectAssetsAsync(file, textureGuid.ToString());
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.Log($"Failed to copy texture to project assets: {ex.Message}. Using original path.", LogType.Warning);
-                            texturePath = file;
-                        }
-                    }
+                    string texturePath = await PrepareTexturePathAsync(file, textureGuid, sel, sel.Textures.Count, isExternal);
 
                     var gtxt = new GTexture(textureGuid, texturePath, sel.TypeNumeric, sel.Number, sel.Textures.Count, sel.HasSkin, sel.IsProp);
                     gtxt.LoadThumbnailAsync();
@@ -985,10 +951,68 @@ namespace grzyClothTool.Controls
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Images (png/jpg/dds) are converted to a game-ready .ytd on import so they preview and
+        /// build exactly like real textures. .ytd files are copied as-is.
+        /// </summary>
+        private static async Task<string> PrepareTexturePathAsync(string file, Guid textureGuid, GDrawable sel, int textureIndex, bool isExternal)
+        {
+            var extension = Path.GetExtension(file).ToLowerInvariant();
+
+            if (extension is ".png" or ".jpg" or ".jpeg" or ".dds")
+            {
+                try
+                {
+                    var letter = (char)('a' + textureIndex);
+                    var baseName = $"{sel.TypeName}_diff_{sel.Number:D3}_{letter}";
+                    var textureName = sel.IsProp ? baseName : $"{baseName}_{(sel.HasSkin ? "whi" : "uni")}";
+
+                    var ytdBytes = await Task.Run(() => ImgHelper.ConvertImageToYtdBytes(file, textureName));
+
+                    if (isExternal)
+                    {
+                        var folder = Path.GetDirectoryName(file) ?? string.Empty;
+                        var target = Path.Combine(folder, $"{Path.GetFileNameWithoutExtension(file)}.ytd");
+                        if (File.Exists(target))
+                        {
+                            target = Path.Combine(folder, $"{Path.GetFileNameWithoutExtension(file)}_{textureGuid.ToString("N")[..8]}.ytd");
+                        }
+
+                        await File.WriteAllBytesAsync(target, ytdBytes);
+                        LogHelper.Log($"Converted {Path.GetFileName(file)} to {Path.GetFileName(target)}", LogType.Info);
+                        return target;
+                    }
+
+                    var relative = await FileHelper.WriteBytesToProjectAssetsAsync(ytdBytes, $"{textureGuid}.ytd");
+                    LogHelper.Log($"Converted {Path.GetFileName(file)} to .ytd", LogType.Info);
+                    return relative;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Log($"Could not convert {Path.GetFileName(file)} to .ytd ({ex.Message}). Keeping the original image; it will be converted at build.", LogType.Warning);
+                }
+            }
+
+            if (isExternal)
+            {
+                return file;
+            }
+
+            try
+            {
+                return await FileHelper.CopyToProjectAssetsAsync(file, textureGuid.ToString());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Log($"Failed to copy texture to project assets: {ex.Message}. Using original path.", LogType.Warning);
+                return file;
+            }
+        }
+
         private static bool IsValidTextureFile(string filePath)
         {
             var extension = Path.GetExtension(filePath).ToLowerInvariant();
-            return extension == ".ytd" || extension == ".jpg" || extension == ".png" || extension == ".dds";
+            return extension == ".ytd" || extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".dds";
         }
 
         #endregion

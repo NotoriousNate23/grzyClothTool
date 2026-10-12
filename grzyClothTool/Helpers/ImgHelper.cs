@@ -196,6 +196,66 @@ public static class ImgHelper
         throw new NotSupportedException($"Unsupported file extension: {gtxt.Extension}");
     }
 
+    /// <summary>
+    /// Converts a png/jpg/dds file into a game-ready YTD: nearest power-of-two size,
+    /// DXT1 (opaque) or DXT5 (alpha), full mip chain. Used when textures are added
+    /// and by the 3D preview, so images behave exactly like real .ytd textures.
+    /// </summary>
+    public static byte[] ConvertImageToYtdBytes(string imagePath, string textureName)
+    {
+        var ext = Path.GetExtension(imagePath).ToLowerInvariant();
+        CodeWalker.GameFiles.Texture? texture = null;
+
+        if (ext == ".dds")
+        {
+            try
+            {
+                texture = CodeWalker.Utils.DDSIO.GetTexture(File.ReadAllBytes(imagePath));
+            }
+            catch
+            {
+                texture = null; // fall back to ImageMagick re-encode
+            }
+        }
+
+        if (texture == null)
+        {
+            using var img = new MagickImage(imagePath);
+            int width = NearestPowerOfTwo((int)img.Width);
+            int height = NearestPowerOfTwo((int)img.Height);
+            bool hasAlpha = img.HasAlpha && !img.IsOpaque;
+            string compression = hasAlpha ? "D3DFMT_DXT5" : "D3DFMT_DXT1";
+
+            img.Format = MagickFormat.Dds;
+            ResizeExact(img, width, height, compression);
+            img.Settings.SetDefine(MagickFormat.Dds, "compression", GetCompressionString(compression));
+            img.Settings.SetDefine(MagickFormat.Dds, "cluster-fit", true);
+            img.Settings.SetDefine(MagickFormat.Dds, "mipmaps", GetCorrectMipMapAmount(width, height));
+
+            using var stream = new MemoryStream();
+            img.Write(stream);
+            texture = CodeWalker.Utils.DDSIO.GetTexture(stream.ToArray());
+        }
+
+        texture.Name = textureName;
+
+        var ytd = new YtdFile
+        {
+            TextureDict = new TextureDictionary()
+        };
+        ytd.TextureDict.BuildFromTextureList([texture]);
+
+        return ytd.Save();
+    }
+
+    private static int NearestPowerOfTwo(int value)
+    {
+        value = Math.Clamp(value, 4, 4096);
+        int lower = 1 << (int)Math.Floor(Math.Log2(value));
+        int upper = Math.Min(lower << 1, 4096);
+        return (value - lower) <= (upper - value) ? lower : upper;
+    }
+
     private static string GetCompressionString(string cwCompression)
     {
         return cwCompression switch
