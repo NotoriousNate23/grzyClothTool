@@ -13,6 +13,7 @@
     <converters:FilePathToShortVersionConverter x:Key="FilePathToShortVersionConverter" />
     <converters:UpperCaseConverter x:Key="UpperCaseConverter" />
     <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
+    <converters:LessThanConverter x:Key="LessThanConverter" />
     <BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
 
     <system:Double x:Key="DisabledOpacity">0.45</system:Double>

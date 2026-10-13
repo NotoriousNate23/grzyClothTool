@@ -550,20 +550,25 @@
                     </Style>
                 </Grid.Style>
 
-                <Grid Margin="8">
+                <!-- Responsive editor: options sit beside the main card, or below it when narrow -->
+                <Grid x:Name="EditorRoot" Margin="12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*" />
-                        <ColumnDefinition Width="250" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource ModernCard}" Margin="0,0,4,0">
+                    <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource ModernCard}" Margin="0" MinHeight="320">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="150" />
-                                <RowDefinition Height="*" />
+                                <RowDefinition Height="0" />
+                                <RowDefinition Height="*" MinHeight="180" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0"
@@ -585,27 +590,21 @@
                                 </TextBlock.Style>
                             </TextBlock>
 
-                            <Grid Grid.Row="1" Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <c:ModernLabelTextBox Grid.Column="0"
+                            <!-- Identity: wraps instead of overlapping at small widths -->
+                            <WrapPanel Grid.Row="1" Margin="0,0,0,6" Orientation="Horizontal">
+                                <c:ModernLabelTextBox Width="240"
+                                VerticalAlignment="Center"
                                 Tag="DisplayName" 
                                 Label="Display Name" 
                                 Text="{Binding SelectedAddon.SelectedDrawable.DisplayName, UpdateSourceTrigger=PropertyChanged}" 
-                                Margin="0,0,8,0" 
+                                Margin="0,0,10,10" 
                                 IsUpdated="SelectedDrawable_Updated"/>
 
                                 <!-- Cloth type: Component / Prop -->
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource SegmentedTrack}"
+                                <Border Style="{StaticResource SegmentedTrack}"
                                         Height="40"
                                         VerticalAlignment="Center"
-                                        Margin="0,0,8,0"
+                                        Margin="0,0,10,10"
                                         ToolTip="Cloth type. Components (jbib, lowr, feet…) are worn as clothing; props (p_head, p_eyes…) are attached accessories."
                                         ToolTipService.InitialShowDelay="400">
                                     <StackPanel Orientation="Horizontal">
@@ -622,29 +621,26 @@
                                     </StackPanel>
                                 </Border>
 
-                                <c:ModernLabelComboBox Grid.Column="2"
-                                                      Width="150"
+                                <c:ModernLabelComboBox Width="160"
+                                                      VerticalAlignment="Center"
+                                                      Margin="-5,-5,5,5"
                                                       Label="Drawable Type" 
                                                       SelectedItem="{Binding SelectedAddon.SelectedDrawable.TypeName, Mode=TwoWay}" 
                                                       ItemsSource="{Binding SelectedAddon.SelectedDrawable.AvailableTypes}" 
-                                                      IsUpdated="DrawableType_Changed"
-                                                      Margin="0,0,8,0" />
+                                                      IsUpdated="DrawableType_Changed" />
 
-                                <c:ModernLabelComboBox Grid.Column="3"
-                                                      Width="120"
+                                <c:ModernLabelComboBox Width="130"
+                                                      VerticalAlignment="Center"
+                                                      Margin="-5,-5,0,5"
                                                       Label="Sex" 
                                                       SelectedItem="{Binding SelectedAddon.SelectedDrawable.SexName, Mode=TwoWay}" 
                                                       ItemsSource="{Binding SelectedAddon.SelectedDrawable.AvailableSex}" 
                                                       IsUpdated="DrawableSex_Changed" />
-                            </Grid>
+                            </WrapPanel>
 
-                            <Grid Grid.Row="2" Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                            <WrapPanel Grid.Row="2" Margin="0,0,0,8" Orientation="Horizontal">
                                 <c:ModernLabelTextBox Tag="FirstPersonPath"
-                                                     Grid.Column="0"
+                                                     Width="280"
                                                      Label="First person file" 
                                                      IsFileSelection="True" 
                                                      FileExtension=".ydd" 
@@ -653,10 +649,10 @@
                                                      ToolTip="{Binding SelectedAddon.SelectedDrawable.FirstPersonPath}" 
                                                      ToolTipService.InitialShowDelay="200" 
                                                      IsUpdated="SelectedDrawable_Updated"
-                                                     Margin="0,0,8,0" />
+                                                     Margin="0,0,10,10" />
 
                                 <c:ModernLabelTextBox Tag="ClothPhysicsPath"
-                                                     Grid.Column="1"
+                                                     Width="280"
                                                      Label="Cloth physics file (.yld)" 
                                                      IsFileSelection="True" 
                                                      FileExtension=".yld" 
@@ -664,9 +660,9 @@
                                                      Text="{Binding SelectedAddon.SelectedDrawable.ClothPhysicsPath, Converter={StaticResource FilePathToShortVersionConverter}}" 
                                                      ToolTip="{Binding SelectedAddon.SelectedDrawable.ClothPhysicsPath}" 
                                                      ToolTipService.InitialShowDelay="400" 
-                                                     Margin="8,0,4,0"
+                                                     Margin="0,0,0,10"
                                                       IsUpdated="SelectedDrawable_Updated" />
-                            </Grid>
+                            </WrapPanel>
 
                             <Border Grid.Row="4" 
                                     VerticalAlignment="Stretch"
@@ -1320,7 +1316,25 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="1" Style="{StaticResource ModernCard}" Margin="4,0,0,0">
+                    <Border>
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource ModernCard}">
+                                <Setter Property="Grid.Column" Value="1" />
+                                <Setter Property="Grid.Row" Value="0" />
+                                <Setter Property="Width" Value="290" />
+                                <Setter Property="Margin" Value="12,0,0,0" />
+                                <Style.Triggers>
+                                    <!-- narrow window: options move under the editor -->
+                                    <DataTrigger Binding="{Binding ActualWidth, ElementName=EditorRoot, Converter={StaticResource LessThanConverter}, ConverterParameter=900}" Value="True">
+                                        <Setter Property="Grid.Column" Value="0" />
+                                        <Setter Property="Grid.Row" Value="1" />
+                                        <Setter Property="Width" Value="NaN" />
+                                        <Setter Property="MaxHeight" Value="280" />
+                                        <Setter Property="Margin" Value="0,12,0,0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel>
                                 <TextBlock Text="Drawable Options" Style="{StaticResource SectionTitle}" />

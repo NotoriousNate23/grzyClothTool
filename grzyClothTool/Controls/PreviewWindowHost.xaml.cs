@@ -29,6 +29,35 @@ namespace grzyClothTool.Controls
 
         public static event EventHandler Preview3DAvailabilityChanged;
 
+        /// <summary>
+        /// "Keep outfit": new selections only replace drawables in the same slot
+        /// (same component/prop type and gender); everything else stays on the ped.
+        /// </summary>
+        public static bool KeepOutfit { get; private set; }
+
+        private readonly Dictionary<string, (bool IsProp, int Type, Enums.SexType Sex)> _loadedSlots = [];
+
+        private void KeepOutfit_Changed(object sender, RoutedEventArgs e)
+        {
+            KeepOutfit = KeepOutfitCheck.IsChecked == true;
+        }
+
+        private void ClearOutfit_Click(object sender, RoutedEventArgs e)
+        {
+            var addon = MainWindow.AddonManager?.SelectedAddon;
+            var selection = new ObservableCollection<GDrawable>(addon?.SelectedDrawables ?? []);
+            var keep = KeepOutfit;
+            KeepOutfit = false;
+            try
+            {
+                UpdateDrawables(selection, addon?.SelectedTexture, []);
+            }
+            finally
+            {
+                KeepOutfit = keep;
+            }
+        }
+
         public PreviewWindowHost()
         {
             InitializeComponent();
@@ -332,7 +361,23 @@ namespace grzyClothTool.Controls
             lock (_customPedsForm.Renderer.RenderSyncRoot)
             {
                 var selectedNames = selectedDrawables.Select(d => d.Name).ToHashSet();
-                var removedDrawables = _customPedsForm.LoadedDrawables.Keys.Where(name => !selectedNames.Contains(name)).ToList();
+                List<string> removedDrawables;
+                if (KeepOutfit && selectedDrawables.Count > 0)
+                {
+                    // replace only what occupies the same slot, or anything from the other ped gender
+                    var selectedSlots = selectedDrawables.Select(d => (d.IsProp, d.TypeNumeric, d.Sex)).ToHashSet();
+                    var selectedSexes = selectedDrawables.Select(d => d.Sex).ToHashSet();
+                    removedDrawables = _customPedsForm.LoadedDrawables.Keys
+                        .Where(name => !selectedNames.Contains(name) &&
+                                       (!_loadedSlots.TryGetValue(name, out var slot) ||
+                                        selectedSlots.Contains(slot) ||
+                                        !selectedSexes.Contains(slot.Sex)))
+                        .ToList();
+                }
+                else
+                {
+                    removedDrawables = _customPedsForm.LoadedDrawables.Keys.Where(name => !selectedNames.Contains(name)).ToList();
+                }
                 foreach (var removed in removedDrawables)
                 {
                     if (_customPedsForm.LoadedDrawables.TryGetValue(removed, out var removedDrawable))
@@ -347,6 +392,7 @@ namespace grzyClothTool.Controls
                         }
                     }
                     _customPedsForm.LoadedDrawables.Remove(removed);
+                    _loadedSlots.Remove(removed);
                 }
 
                 if (selectedDrawables.Count == 0 && _customPedsForm.Renderer != null)
@@ -415,6 +461,7 @@ namespace grzyClothTool.Controls
                         }
 
                         _customPedsForm.LoadedDrawables[drawable.Name] = firstDrawable;
+                        _loadedSlots[drawable.Name] = (drawable.IsProp, drawable.TypeNumeric, drawable.Sex);
                         if (ytd?.TextureDict != null)
                         {
                             _customPedsForm.LoadedTextures[firstDrawable] = ytd.TextureDict;
@@ -458,6 +505,7 @@ namespace grzyClothTool.Controls
             }
 
             _customPedsForm.LoadedDrawables.Remove(drawableName);
+            _loadedSlots.Remove(drawableName);
         }
 
         private void HandlePreviewError(string context, Exception ex)

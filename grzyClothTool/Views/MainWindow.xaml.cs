@@ -197,6 +197,38 @@ namespace grzyClothTool
             }
         }
         
+        /// <summary>
+        /// Opens the 3D preview as its own pop-out window (DurtyCloth-style) next to the app.
+        /// It can still be docked back by dragging it onto the main window.
+        /// </summary>
+        public void ShowPreviewWindow()
+        {
+            if (PreviewAnchorable == null)
+            {
+                return;
+            }
+
+            PreviewAnchorable.Show();
+
+            if (!PreviewAnchorable.IsFloating)
+            {
+                var bounds = WindowState == WindowState.Maximized
+                    ? SystemParameters.WorkArea
+                    : new Rect(Left, Top, ActualWidth, ActualHeight);
+
+                var width = Math.Min(760, Math.Max(480, bounds.Width * 0.38));
+                var height = Math.Max(560, bounds.Height - 120);
+
+                PreviewAnchorable.FloatingWidth = width;
+                PreviewAnchorable.FloatingHeight = height;
+                PreviewAnchorable.FloatingLeft = bounds.Right - width - 24;
+                PreviewAnchorable.FloatingTop = bounds.Top + 70;
+                PreviewAnchorable.Float();
+            }
+
+            PreviewHost?.InitializePreview();
+        }
+
         private void PreviewAnchorable_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;

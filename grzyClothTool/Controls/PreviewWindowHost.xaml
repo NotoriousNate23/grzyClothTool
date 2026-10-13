@@ -8,7 +8,38 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Background="{DynamicResource Brush50}">
     <Grid>
-        <WindowsFormsHost x:Name="PreviewHost" Background="Black" />
-        <TextBlock x:Name="PlaceholderText" IsHitTestVisible="False"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Preview toolbar (kept outside the 3D surface so nothing overlaps it) -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource SidebarBrush}"
+                BorderBrush="{DynamicResource DividerBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="12,7">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="KeepOutfitCheck"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          FontSize="12.5"
+                          ToolTip="Build an outfit: selecting a drawable only replaces items in the same slot, everything else stays on the ped."
+                          Checked="KeepOutfit_Changed"
+                          Unchecked="KeepOutfit_Changed">
+                    <TextBlock Text="Keep outfit" Margin="2,0,0,0" />
+                </CheckBox>
+                <Button Style="{StaticResource GhostButton}"
+                        Padding="10,3"
+                        Margin="12,0,0,0"
+                        FontSize="12"
+                        ToolTip="Remove everything except the current selection"
+                        Click="ClearOutfit_Click"
+                        Content="Clear outfit" />
+            </StackPanel>
+        </Border>
+
+        <WindowsFormsHost x:Name="PreviewHost" Grid.Row="1" Background="Black" />
+        <TextBlock x:Name="PlaceholderText" Grid.Row="1" IsHitTestVisible="False"/>
     </Grid>
 </UserControl>

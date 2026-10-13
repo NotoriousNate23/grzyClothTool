@@ -189,8 +189,7 @@ public static class CWHelper
 
         if (mainWindow.PreviewAnchorable != null)
         {
-            mainWindow.PreviewAnchorable.Show();
-            mainWindow.PreviewHost?.InitializePreview();
+            mainWindow.ShowPreviewWindow();
 
             if (!drawable.IsEncrypted)
             {

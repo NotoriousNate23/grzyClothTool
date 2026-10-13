@@ -604,8 +604,7 @@ namespace grzyClothTool.Views
 
             if (mainWindow.PreviewAnchorable != null)
             {
-                mainWindow.PreviewAnchorable.Show();
-                mainWindow.PreviewHost?.InitializePreview();
+                mainWindow.ShowPreviewWindow();
 
                 if (Addon.SelectedDrawable != null && !Addon.SelectedDrawable.IsEncrypted)
                 {
