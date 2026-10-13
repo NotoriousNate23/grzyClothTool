@@ -5456,6 +5456,7 @@ namespace CodeWalker.GameFiles
 
         public bool IsHairScaleEnabled { get; set; }
         public bool IsHighHeelsEnabled { get; set; }
+        public bool HidesHair { get; set; }
 
         public float HairScaleValue { get; set; }
         public float HighHeelsValue { get; set; }

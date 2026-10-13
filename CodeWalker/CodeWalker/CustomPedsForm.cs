@@ -305,6 +305,8 @@ namespace CodeWalker
 
                     Renderer.SelectedDrawable = null;
 
+                    Renderer.HideHair = IsHairHidden();
+
                     Renderer.RenderPed(SelectedPed);
 
                     Renderer.RenderQueued();
@@ -330,6 +332,28 @@ namespace CodeWalker
                 UpdateStatus($"Rendering error - preview paused");
                 LogError($"3D Preview rendering crashed: {ex.Message}");
             }
+        }
+
+        /// <summary>True when any drawable shown on the ped (selected or kept) has "Hides hair" set.</summary>
+        private bool IsHairHidden()
+        {
+            foreach (var d in LoadedDrawables.Values)
+            {
+                if (d != null && d.HidesHair) return true;
+            }
+
+            foreach (var d in SavedDrawables.Values)
+            {
+                if (d != null && d.HidesHair) return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsHairDrawable(Drawable d)
+        {
+            var name = d?.Name;
+            return name != null && (name.StartsWith("hair_", StringComparison.OrdinalIgnoreCase) || name.IndexOf("^hair_", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void RenderSelectedItems()
@@ -387,6 +411,9 @@ namespace CodeWalker
 
         private void RenderSelectedItem(Drawable d, TextureDictionary t)
         {
+            // a mask/component with "Hides hair" also hides addon hair being previewed
+            if (Renderer.HideHair && IsHairDrawable(d)) return;
+
             // dirty hack to render drawable only when all other drawables are rendered, it fixes issue that props sometimes are not rendered attached to the head
             if (Renderer.RenderedDrawablesDict.Count < 4) return;
 
@@ -1106,6 +1133,9 @@ namespace CodeWalker
                         break;
                     case "EnableHairScale":
                         Renderer.SelDrawable.IsHairScaleEnabled = bool.Parse(value);
+                        break;
+                    case "HidesHair":
+                        Renderer.SelDrawable.HidesHair = bool.Parse(value);
                         break;
                     case "HairScaleValue":
                         Renderer.SelDrawable.HairScaleValue = Convert.ToSingle(value);

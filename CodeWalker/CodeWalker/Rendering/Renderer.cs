@@ -144,6 +144,9 @@ namespace CodeWalker.Rendering
 
         public DrawableBase SelectedDrawable = null;
         public Drawable SelDrawable = null;
+
+        /// <summary>Set by the ped preview when a worn drawable has "Hides hair" - skips the ped's hair component.</summary>
+        public bool HideHair = false;
         public Drawable PreviousSelDrawable = null;
         public Dictionary<DrawableBase, bool> SelectionDrawableDrawFlags = new Dictionary<DrawableBase, bool>();
         public Dictionary<DrawableModel, bool> SelectionModelDrawFlags = new Dictionary<DrawableModel, bool>();
@@ -1862,6 +1865,11 @@ namespace CodeWalker.Rendering
                 {
                     for (int i = 0; i < 12; i++)
                     {
+                        if (i == 2 && HideHair)
+                        {
+                            continue; // component 2 = hair
+                        }
+
                         RenderPedComponent(ped, i);
                     }
                 }

@@ -113,6 +113,7 @@ public static class CWHelper
             var drawable = ydd.Drawables.First();
             drawable.Name = Path.GetFileNameWithoutExtension(d.Name);
 
+            drawable.HidesHair = d.HidesHair && !d.IsProp;
             drawable.IsHairScaleEnabled = d.EnableHairScale;
             if (drawable.IsHairScaleEnabled)
             {
