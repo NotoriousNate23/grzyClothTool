@@ -158,10 +158,7 @@
                                 </GroupBox.Header>
                                 <StackPanel Margin="5">
                                     <TextBlock Padding="5,2,5,5" FontStyle="Italic" FontWeight="Normal" Foreground="{DynamicResource Brush500}" TextWrapping="Wrap">Controls the section headers shown in the drawable list.</TextBlock>
-                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="None - one flat list, no sections"
-                                        GroupName="GroupingMode"
-                                        IsChecked="{Binding Path=Instance.DrawableGroupingMode, Source={x:Static helpers:SettingsHelper.Instance}, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=None, Mode=TwoWay}" />
-                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="By Type - sections for clothing or prop type"
+                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="Categories - collapsible sections per clothing / prop type (recommended)"
                                         GroupName="GroupingMode"
                                         IsChecked="{Binding Path=Instance.DrawableGroupingMode, Source={x:Static helpers:SettingsHelper.Instance}, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=ByType, Mode=TwoWay}" />
                                     <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="By Group - sections for your custom groups"

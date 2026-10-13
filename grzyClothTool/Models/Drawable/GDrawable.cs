@@ -820,6 +820,54 @@ public class GDrawable : INotifyPropertyChanged
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        if (name == nameof(TypeName) || name == nameof(IsProp))
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CategoryName)));
+        }
+    }
+
+    /// <summary>Sidebar category, e.g. "Undershirts · accs" / "Hats · p_head".</summary>
+    [JsonIgnore]
+    public string CategoryName => $"{GetCategoryLabel(IsProp, TypeNumeric)} · {EnumHelper.GetName(TypeNumeric, IsProp)}";
+
+    public static string GetCategoryLabel(bool isProp, int typeNumeric)
+    {
+        if (isProp)
+        {
+            return (Enums.PropNumbers)typeNumeric switch
+            {
+                Enums.PropNumbers.p_head => "Hats",
+                Enums.PropNumbers.p_eyes => "Glasses",
+                Enums.PropNumbers.p_ears => "Earrings",
+                Enums.PropNumbers.p_mouth => "Mouth",
+                Enums.PropNumbers.p_lhand => "Left hand",
+                Enums.PropNumbers.p_rhand => "Right hand",
+                Enums.PropNumbers.p_lwrist => "Watches",
+                Enums.PropNumbers.p_rwrist => "Bracelets",
+                Enums.PropNumbers.p_hip => "Hip",
+                Enums.PropNumbers.p_lfoot => "Left foot",
+                Enums.PropNumbers.p_rfoot => "Right foot",
+                _ => "Hand props",
+            };
+        }
+
+        return (Enums.ComponentNumbers)typeNumeric switch
+        {
+            Enums.ComponentNumbers.head => "Heads",
+            Enums.ComponentNumbers.berd => "Masks",
+            Enums.ComponentNumbers.hair => "Hair",
+            Enums.ComponentNumbers.uppr => "Arms",
+            Enums.ComponentNumbers.lowr => "Pants",
+            Enums.ComponentNumbers.hand => "Bags",
+            Enums.ComponentNumbers.feet => "Shoes",
+            Enums.ComponentNumbers.teef => "Chains",
+            Enums.ComponentNumbers.accs => "Undershirts",
+            Enums.ComponentNumbers.task => "Body armor",
+            Enums.ComponentNumbers.decl => "Decals",
+            Enums.ComponentNumbers.jbib => "Tops",
+            _ => "Other",
+        };
     }
 
     private async Task<GDrawableDetails?> LoadDrawableDetailsWithConcurrencyControl()

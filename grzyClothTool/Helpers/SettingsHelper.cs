@@ -108,6 +108,10 @@ public class SettingsHelper : INotifyPropertyChanged
         _autoDeleteFiles = Properties.Settings.Default.AutoDeleteFiles;
         _markNewDrawables = Properties.Settings.Default.MarkNewDrawables;
         _drawableGroupingMode = (GroupingMode)Properties.Settings.Default.DrawableGroupingMode;
+        if (_drawableGroupingMode == GroupingMode.None)
+        {
+            _drawableGroupingMode = GroupingMode.ByType; // the sidebar is always categorized now
+        }
         _textureResolutionLimitDiffuse = Properties.Settings.Default.TextureResolutionLimitDiffuse;
         _textureResolutionLimitNormal = Properties.Settings.Default.TextureResolutionLimitNormal;
         _textureResolutionLimitSpecular = Properties.Settings.Default.TextureResolutionLimitSpecular;

@@ -88,7 +88,7 @@ namespace grzyClothTool.Controls
         private readonly Dictionary<string, bool> _groupExpandedStates = value;
         private bool _isBatchUpdating = false;
 
-        public bool IsPrimaryGroupingByTypeName => SettingsHelper.Instance.DrawableGroupingMode == GroupingMode.ByType;
+        public bool IsPrimaryGroupingByTypeName => SettingsHelper.Instance.DrawableGroupingMode is GroupingMode.ByType or GroupingMode.None;
 
         public DrawableList()
         {
@@ -120,6 +120,8 @@ namespace grzyClothTool.Controls
             MyListBox.AddHandler(Expander.CollapsedEvent, new RoutedEventHandler(Expander_StateChanged));
         }
 
+        private bool _isCollapsingOthers;
+
         private void Expander_StateChanged(object sender, RoutedEventArgs e)
         {
             if (e.OriginalSource is Expander expander && expander.DataContext is CollectionViewGroup group)
@@ -129,6 +131,37 @@ namespace grzyClothTool.Controls
                 {
                     _groupExpandedStates[groupName] = expander.IsExpanded;
                 }
+
+                // Accordion: opening one category closes the others, so large packs stay short.
+                // (Disabled while searching, where every matching category is shown open.)
+                if (expander.IsExpanded && !_isCollapsingOthers && IsSingleLevelCategories && string.IsNullOrWhiteSpace(SearchText))
+                {
+                    _isCollapsingOthers = true;
+                    try
+                    {
+                        foreach (var key in _groupExpandedStates.Keys.ToList())
+                        {
+                            if (key != groupName)
+                            {
+                                _groupExpandedStates[key] = false;
+                            }
+                        }
+
+                        foreach (var other in FindVisualChildren<Expander>(MyListBox))
+                        {
+                            if (other != expander && other.DataContext is CollectionViewGroup && other.IsExpanded)
+                            {
+                                other.SetCurrentValue(Expander.IsExpandedProperty, false);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isCollapsingOthers = false;
+                    }
+
+                    expander.BringIntoView();
+                }
             }
         }
 
@@ -136,8 +169,13 @@ namespace grzyClothTool.Controls
         {
             if (string.IsNullOrEmpty(groupName))
                 return true;
-                
-            return !_groupExpandedStates.TryGetValue(groupName, out bool isExpanded) || isExpanded;
+
+            // searching shows every category that has a match, open
+            if (!string.IsNullOrWhiteSpace(SearchText))
+                return true;
+
+            // categories start closed
+            return _groupExpandedStates.TryGetValue(groupName, out bool isExpanded) && isExpanded;
         }
 
         private void MyListBox_MouseLeave(object sender, MouseEventArgs e)
@@ -279,17 +317,17 @@ namespace grzyClothTool.Controls
 
                 switch (mode)
                 {
+                    case GroupingMode.None:
                     case GroupingMode.ByType:
-                        DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.TypeName)));
+                        DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.CategoryName)));
                         break;
                     case GroupingMode.GroupDefined:
                         DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.Group)));
                         break;
                     case GroupingMode.Both:
                         DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.Group)));
-                        DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.TypeName)));
+                        DrawablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GDrawable.CategoryName)));
                         break;
-                    // None: no grouping
                 }
 
                 DrawablesView.SortDescriptions.Clear();
@@ -303,21 +341,22 @@ namespace grzyClothTool.Controls
                     liveView.LiveGroupingProperties.Clear();
                     if (mode == GroupingMode.GroupDefined || mode == GroupingMode.Both)
                         liveView.LiveGroupingProperties.Add(nameof(GDrawable.Group));
-                    if (mode == GroupingMode.ByType || mode == GroupingMode.Both)
-                        liveView.LiveGroupingProperties.Add(nameof(GDrawable.TypeName));
+                    if (mode == GroupingMode.ByType || mode == GroupingMode.None || mode == GroupingMode.Both)
+                        liveView.LiveGroupingProperties.Add(nameof(GDrawable.CategoryName));
                     liveView.IsLiveGrouping = liveView.LiveGroupingProperties.Count > 0;
 
                     if (liveView.CanChangeLiveSorting)
                     {
                         liveView.LiveSortingProperties.Clear();
                         liveView.LiveSortingProperties.Add(nameof(GDrawable.Group));
-                        liveView.LiveSortingProperties.Add(nameof(GDrawable.TypeName));
+                        liveView.LiveSortingProperties.Add(nameof(GDrawable.CategoryName));
+                        liveView.LiveSortingProperties.Add(nameof(GDrawable.Sex));
                         liveView.LiveSortingProperties.Add(nameof(GDrawable.Number));
                         liveView.IsLiveSorting = true;
                     }
                 }
 
-                DrawablesView.Filter = string.IsNullOrWhiteSpace(SearchText) ? null : FilterDrawable;
+                DrawablesView.Filter = IsFiltering ? FilterDrawable : null;
             }
 
             UpdateFilteredCount();
@@ -339,18 +378,67 @@ namespace grzyClothTool.Controls
         {
             if (DrawablesView == null) return;
 
-            var searchText = SearchText;
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                DrawablesView.Filter = null;
-            }
-            else
-            {
-                DrawablesView.Filter = FilterDrawable;
-            }
-
+            DrawablesView.Filter = IsFiltering ? FilterDrawable : null;
             DrawablesView.Refresh();
             UpdateFilteredCount();
+        }
+
+        // ---------------- sidebar: gender filter + categories ----------------
+
+        private Enums.SexType? _sexFilter;
+
+        private bool IsFiltering => !string.IsNullOrWhiteSpace(SearchText) || _sexFilter.HasValue;
+
+        private bool IsSingleLevelCategories =>
+            SettingsHelper.Instance.DrawableGroupingMode is GroupingMode.ByType or GroupingMode.None;
+
+        private void SexAll_Click(object sender, RoutedEventArgs e) => SetSexFilter(null);
+        private void SexMale_Click(object sender, RoutedEventArgs e) => SetSexFilter(Enums.SexType.male);
+        private void SexFemale_Click(object sender, RoutedEventArgs e) => SetSexFilter(Enums.SexType.female);
+
+        private void SetSexFilter(Enums.SexType? sex)
+        {
+            _sexFilter = sex;
+            SexAllButton.Tag = !sex.HasValue;
+            SexMaleButton.Tag = sex == Enums.SexType.male;
+            SexFemaleButton.Tag = sex == Enums.SexType.female;
+            ApplySearchFilter();
+        }
+
+        private void CollapseAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var key in _groupExpandedStates.Keys.ToList())
+            {
+                _groupExpandedStates[key] = false;
+            }
+
+            foreach (var expander in FindVisualChildren<Expander>(MyListBox))
+            {
+                if (expander.DataContext is CollectionViewGroup)
+                {
+                    expander.SetCurrentValue(Expander.IsExpandedProperty, false);
+                }
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T match)
+                {
+                    yield return match;
+                }
+
+                foreach (var nested in FindVisualChildren<T>(child))
+                {
+                    yield return nested;
+                }
+            }
         }
 
         private void UpdateFilteredCount()
@@ -375,6 +463,9 @@ namespace grzyClothTool.Controls
         private bool FilterDrawable(object item)
         {
             if (item is not GDrawable drawable)
+                return false;
+
+            if (_sexFilter.HasValue && drawable.Sex != _sexFilter.Value)
                 return false;
 
             var searchText = SearchText;
@@ -1125,16 +1216,7 @@ namespace grzyClothTool.Controls
                 if (groupComparison != 0)
                     return groupComparison;
 
-                // Within the same group, sort by gender (female first), then TypeName alphabetically, then by Number
-                int genderComparison = drawableX.Sex.CompareTo(drawableY.Sex);
-                if (genderComparison != 0)
-                    return genderComparison;
-
-                int typeComparison = string.Compare(drawableX.TypeName, drawableY.TypeName, StringComparison.OrdinalIgnoreCase);
-                if (typeComparison != 0)
-                    return typeComparison;
-
-                return drawableX.Number.CompareTo(drawableY.Number);
+                return CompareCategoryThenNumber(drawableX, drawableY);
             }
 
             // X has a group, Y doesn't - X comes first (groups before ungrouped)
@@ -1145,16 +1227,22 @@ namespace grzyClothTool.Controls
             if (!hasGroupX && hasGroupY)
                 return 1;
 
-            // Neither has a group - sort by gender (female first), then TypeName alphabetically, then by Number
-            int genderComparisonNoGroup = drawableX.Sex.CompareTo(drawableY.Sex);
-            if (genderComparisonNoGroup != 0)
-                return genderComparisonNoGroup;
+            return CompareCategoryThenNumber(drawableX, drawableY);
+        }
 
-            int typeComparisonNoGroup = string.Compare(drawableX.TypeName, drawableY.TypeName, StringComparison.OrdinalIgnoreCase);
-            if (typeComparisonNoGroup != 0)
-                return typeComparisonNoGroup;
+        // components before props, types in game slot order, then female/male, then number
+        private static int CompareCategoryThenNumber(GDrawable x, GDrawable y)
+        {
+            int kind = x.IsProp.CompareTo(y.IsProp);
+            if (kind != 0) return kind;
 
-            return drawableX.Number.CompareTo(drawableY.Number);
+            int type = x.TypeNumeric.CompareTo(y.TypeNumeric);
+            if (type != 0) return type;
+
+            int sex = x.Sex.CompareTo(y.Sex);
+            if (sex != 0) return sex;
+
+            return x.Number.CompareTo(y.Number);
         }
 
         private static int CompareNatural(string x, string y)
