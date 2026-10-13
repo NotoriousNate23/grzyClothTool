@@ -842,6 +842,20 @@ namespace grzyClothTool.Models
         /// Used by batch processing after duplicates have already been handled.
         /// Batch callers pass markUnsaved: false and set the unsaved flag once at the end.
         /// </summary>
+        /// <summary>
+        /// Adds already-built drawables in order (numbers assigned per type/sex, new addons
+        /// created at 128). No duplicate prompts - used by project importers.
+        /// </summary>
+        public void AddDrawablesBatch(IEnumerable<GDrawable> drawables)
+        {
+            foreach (var drawable in drawables)
+            {
+                AddDrawableInternal(drawable, markUnsaved: false);
+            }
+
+            SaveHelper.SetUnsavedChanges(true);
+        }
+
         private void AddDrawableInternal(GDrawable drawable, bool markUnsaved = true)
         {
             lock (AddonsLock)

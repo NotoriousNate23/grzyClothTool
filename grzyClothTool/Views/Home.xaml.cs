@@ -411,6 +411,12 @@ namespace grzyClothTool.Views
             }
         }
 
+        private async void ImportDurtyCloth_Click(object sender, RoutedEventArgs e)
+        {
+            await DurtyClothImporter.ImportWithPickerAsync(Window.GetWindow(this));
+            LoadRecentProjects();
+        }
+
         private async void OpenSave_Click(object sender, RoutedEventArgs e)
         {
             try

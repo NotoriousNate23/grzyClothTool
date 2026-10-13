@@ -141,6 +141,25 @@ namespace grzyClothTool.Views
             return dialog;
         }
 
+        public static ProjectSetupDialog ShowForDurtyClothImport(Window owner, string suggestedName, int drawableCount)
+        {
+            var dialog = new ProjectSetupDialog
+            {
+                Owner = owner,
+                DialogTitle = "Import DurtyCloth Project",
+                ConfirmButtonText = "Import",
+                ProjectName = suggestedName,
+                IsSelfContained = true,
+                ShowDrawableCount = true,
+                DrawableCountMessage = $"Found {drawableCount} drawable(s) in the DurtyCloth project"
+            };
+
+            dialog.ProjectNameTextBox.SelectAll();
+            dialog.ProjectNameTextBox.Focus();
+            dialog.ShowDialog();
+            return dialog;
+        }
+
         private void Confirm_Click(object sender, RoutedEventArgs e)
         {
             if (!IsValid)
