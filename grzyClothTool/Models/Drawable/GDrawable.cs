@@ -827,46 +827,75 @@ public class GDrawable : INotifyPropertyChanged
         }
     }
 
-    /// <summary>Sidebar category, e.g. "Undershirts · accs" / "Hats · p_head".</summary>
+    /// <summary>Sidebar category (DurtyCloth-style), e.g. "Undershirt [accs]" / "Hat [p_head]".</summary>
     [JsonIgnore]
-    public string CategoryName => $"{GetCategoryLabel(IsProp, TypeNumeric)} · {EnumHelper.GetName(TypeNumeric, IsProp)}";
+    public string CategoryName => $"{GetCategoryInfo(IsProp, TypeNumeric).Label} [{EnumHelper.GetName(TypeNumeric, IsProp)}]";
 
-    public static string GetCategoryLabel(bool isProp, int typeNumeric)
+    private static readonly Dictionary<string, string> _categoryDescriptions = new();
+
+    /// <summary>Short description shown next to a category header.</summary>
+    public static string GetCategoryDescription(string categoryName)
+    {
+        if (string.IsNullOrEmpty(categoryName))
+        {
+            return string.Empty;
+        }
+
+        if (_categoryDescriptions.Count == 0)
+        {
+            foreach (int value in Enum.GetValues(typeof(Enums.ComponentNumbers)))
+            {
+                var info = GetCategoryInfo(false, value);
+                _categoryDescriptions[$"{info.Label} [{EnumHelper.GetName(value, false)}]"] = info.Description;
+            }
+
+            foreach (int value in Enum.GetValues(typeof(Enums.PropNumbers)))
+            {
+                var info = GetCategoryInfo(true, value);
+                _categoryDescriptions[$"{info.Label} [{EnumHelper.GetName(value, true)}]"] = info.Description;
+            }
+        }
+
+        return _categoryDescriptions.TryGetValue(categoryName, out var description) ? description : string.Empty;
+    }
+
+    public static (string Label, string Description) GetCategoryInfo(bool isProp, int typeNumeric)
     {
         if (isProp)
         {
             return (Enums.PropNumbers)typeNumeric switch
             {
-                Enums.PropNumbers.p_head => "Hats",
-                Enums.PropNumbers.p_eyes => "Glasses",
-                Enums.PropNumbers.p_ears => "Earrings",
-                Enums.PropNumbers.p_mouth => "Mouth",
-                Enums.PropNumbers.p_lhand => "Left hand",
-                Enums.PropNumbers.p_rhand => "Right hand",
-                Enums.PropNumbers.p_lwrist => "Watches",
-                Enums.PropNumbers.p_rwrist => "Bracelets",
-                Enums.PropNumbers.p_hip => "Hip",
-                Enums.PropNumbers.p_lfoot => "Left foot",
-                Enums.PropNumbers.p_rfoot => "Right foot",
-                _ => "Hand props",
+                Enums.PropNumbers.p_head => ("Hat", "Hats & helmets"),
+                Enums.PropNumbers.p_eyes => ("Glasses", "Glasses & visors"),
+                Enums.PropNumbers.p_ears => ("Ears", "Earrings & earpieces"),
+                Enums.PropNumbers.p_mouth => ("Mouth", "Mouth props"),
+                Enums.PropNumbers.p_lhand => ("Left hand", "Held in left hand"),
+                Enums.PropNumbers.p_rhand => ("Right hand", "Held in right hand"),
+                Enums.PropNumbers.p_lwrist => ("Watch", "Left wrist"),
+                Enums.PropNumbers.p_rwrist => ("Bracelet", "Right wrist"),
+                Enums.PropNumbers.p_hip => ("Hip", "Belt & hip props"),
+                Enums.PropNumbers.p_lfoot => ("Left foot", "Left foot props"),
+                Enums.PropNumbers.p_rfoot => ("Right foot", "Right foot props"),
+                Enums.PropNumbers.p_ph_l_hand => ("Left hand (ph)", "Placeholder left hand"),
+                _ => ("Right hand (ph)", "Placeholder right hand"),
             };
         }
 
         return (Enums.ComponentNumbers)typeNumeric switch
         {
-            Enums.ComponentNumbers.head => "Heads",
-            Enums.ComponentNumbers.berd => "Masks",
-            Enums.ComponentNumbers.hair => "Hair",
-            Enums.ComponentNumbers.uppr => "Arms",
-            Enums.ComponentNumbers.lowr => "Pants",
-            Enums.ComponentNumbers.hand => "Bags",
-            Enums.ComponentNumbers.feet => "Shoes",
-            Enums.ComponentNumbers.teef => "Chains",
-            Enums.ComponentNumbers.accs => "Undershirts",
-            Enums.ComponentNumbers.task => "Body armor",
-            Enums.ComponentNumbers.decl => "Decals",
-            Enums.ComponentNumbers.jbib => "Tops",
-            _ => "Other",
+            Enums.ComponentNumbers.head => ("Head", "Faces & heads"),
+            Enums.ComponentNumbers.berd => ("Mask", "Masks & beards"),
+            Enums.ComponentNumbers.hair => ("Hair", "Hairstyles"),
+            Enums.ComponentNumbers.uppr => ("Body", "Torso & gloves"),
+            Enums.ComponentNumbers.lowr => ("Legs", "Pants & trousers"),
+            Enums.ComponentNumbers.hand => ("Bag", "Bags & parachutes"),
+            Enums.ComponentNumbers.feet => ("Shoes", "Sneakers, boots & heels"),
+            Enums.ComponentNumbers.teef => ("Accessories", "Chains, ties & scarves"),
+            Enums.ComponentNumbers.accs => ("Undershirt", "Shirts worn under tops"),
+            Enums.ComponentNumbers.task => ("Armor", "Vests"),
+            Enums.ComponentNumbers.decl => ("Decals", "Badges & logos"),
+            Enums.ComponentNumbers.jbib => ("Top", "Jackets, shirts & hoodies"),
+            _ => ("Other", string.Empty),
         };
     }
 

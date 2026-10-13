@@ -152,23 +152,6 @@
                                 </Grid>
                             </GroupBox>
 
-                            <GroupBox Margin="0,5" Style="{DynamicResource FixedGroupBox}">
-                                <GroupBox.Header>
-                                    <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource Brush950}" Text="Drawable list grouping" />
-                                </GroupBox.Header>
-                                <StackPanel Margin="5">
-                                    <TextBlock Padding="5,2,5,5" FontStyle="Italic" FontWeight="Normal" Foreground="{DynamicResource Brush500}" TextWrapping="Wrap">Controls the section headers shown in the drawable list.</TextBlock>
-                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="Categories - collapsible sections per clothing / prop type (recommended)"
-                                        GroupName="GroupingMode"
-                                        IsChecked="{Binding Path=Instance.DrawableGroupingMode, Source={x:Static helpers:SettingsHelper.Instance}, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=ByType, Mode=TwoWay}" />
-                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="By Group - sections for your custom groups"
-                                        GroupName="GroupingMode"
-                                        IsChecked="{Binding Path=Instance.DrawableGroupingMode, Source={x:Static helpers:SettingsHelper.Instance}, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=GroupDefined, Mode=TwoWay}" />
-                                    <RadioButton Margin="5,3" Foreground="{DynamicResource Brush950}" Content="Both - custom groups first, types inside"
-                                        GroupName="GroupingMode"
-                                        IsChecked="{Binding Path=Instance.DrawableGroupingMode, Source={x:Static helpers:SettingsHelper.Instance}, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Both, Mode=TwoWay}" />
-                                </StackPanel>
-                            </GroupBox>
 
                             <GroupBox Margin="0,5" Height="150" Style="{DynamicResource FixedGroupBox}">
                                 <GroupBox.Header>

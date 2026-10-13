@@ -88,7 +88,8 @@ namespace grzyClothTool.Controls
         private readonly Dictionary<string, bool> _groupExpandedStates = value;
         private bool _isBatchUpdating = false;
 
-        public bool IsPrimaryGroupingByTypeName => SettingsHelper.Instance.DrawableGroupingMode is GroupingMode.ByType or GroupingMode.None;
+        // The sidebar is always a DurtyCloth-style category tree.
+        public bool IsPrimaryGroupingByTypeName => true;
 
         public DrawableList()
         {
@@ -134,7 +135,8 @@ namespace grzyClothTool.Controls
 
                 // Accordion: opening one category closes the others, so large packs stay short.
                 // (Disabled while searching, where every matching category is shown open.)
-                if (expander.IsExpanded && !_isCollapsingOthers && IsSingleLevelCategories && string.IsNullOrWhiteSpace(SearchText))
+                // DurtyCloth-style: categories open independently (no accordion)
+                if (false && expander.IsExpanded && !_isCollapsingOthers && IsSingleLevelCategories && string.IsNullOrWhiteSpace(SearchText))
                 {
                     _isCollapsingOthers = true;
                     try
@@ -309,7 +311,7 @@ namespace grzyClothTool.Controls
 
             DrawablesView = CollectionViewSource.GetDefaultView(ItemsSource);
 
-            var mode = SettingsHelper.Instance.DrawableGroupingMode;
+            var mode = GroupingMode.ByType; // always categories (custom groups stay searchable)
 
             using (DrawablesView.DeferRefresh())
             {
@@ -389,8 +391,7 @@ namespace grzyClothTool.Controls
 
         private bool IsFiltering => !string.IsNullOrWhiteSpace(SearchText) || _sexFilter.HasValue;
 
-        private bool IsSingleLevelCategories =>
-            SettingsHelper.Instance.DrawableGroupingMode is GroupingMode.ByType or GroupingMode.None;
+        private bool IsSingleLevelCategories => true;
 
         private void SexAll_Click(object sender, RoutedEventArgs e) => SetSexFilter(null);
         private void SexMale_Click(object sender, RoutedEventArgs e) => SetSexFilter(Enums.SexType.male);
@@ -1017,7 +1018,8 @@ namespace grzyClothTool.Controls
         {
             if (e.Data.GetDataPresent(typeof(GDrawable)))
             {
-                bool droppedOnGroupHeader = IsOverGroupHeader(e.OriginalSource);
+                // category headers are not custom groups - dropping on them must not rename the group
+                bool droppedOnGroupHeader = false;
                 string targetGroupName = null;
                 
                 if (droppedOnGroupHeader)
@@ -1230,13 +1232,13 @@ namespace grzyClothTool.Controls
             return CompareCategoryThenNumber(drawableX, drawableY);
         }
 
-        // components before props, types in game slot order, then female/male, then number
+        // components before props, categories alphabetical (like DurtyCloth), then female/male, then number
         private static int CompareCategoryThenNumber(GDrawable x, GDrawable y)
         {
             int kind = x.IsProp.CompareTo(y.IsProp);
             if (kind != 0) return kind;
 
-            int type = x.TypeNumeric.CompareTo(y.TypeNumeric);
+            int type = string.Compare(x.CategoryName, y.CategoryName, StringComparison.OrdinalIgnoreCase);
             if (type != 0) return type;
 
             int sex = x.Sex.CompareTo(y.Sex);
@@ -1290,6 +1292,48 @@ namespace grzyClothTool.Controls
             }
 
             return x.Length.CompareTo(y.Length);
+        }
+    }
+
+    /// <summary>"0M · 69F" from a CollectionViewGroup's items (MultiBinding: Items, ItemCount).</summary>
+    public class GroupSexCountConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length > 0 && values[0] is System.Collections.IEnumerable items)
+            {
+                int male = 0, female = 0;
+                foreach (var item in items)
+                {
+                    if (item is GDrawable d)
+                    {
+                        if (d.Sex == Enums.SexType.male) male++; else female++;
+                    }
+                }
+
+                return $"{male}M · {female}F";
+            }
+
+            return string.Empty;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class CategoryDescriptionConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var description = GDrawable.GetCategoryDescription(value as string);
+            return string.IsNullOrEmpty(description) ? string.Empty : $"({description})";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 

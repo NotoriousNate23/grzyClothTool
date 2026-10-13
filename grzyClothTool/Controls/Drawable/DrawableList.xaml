@@ -15,6 +15,8 @@
 
 <UserControl.Resources>
 <local:GroupExpandedStateConverter x:Key="GroupExpandedStateConverter" />
+    <local:GroupSexCountConverter x:Key="GroupSexCountConverter" />
+    <local:CategoryDescriptionConverter x:Key="CategoryDescriptionConverter" />
     <converters:HexColorToBrushConverter x:Key="HexColorToBrushConverter" />
 
         <ContextMenu x:Key="SingleSelectionContextMenu">
@@ -116,7 +118,7 @@
             <Setter Property="AllowDrop" Value="True" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0,0,6,2" />
+            <Setter Property="Margin" Value="0,0,6,3" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
@@ -156,8 +158,8 @@
                                         Background="{DynamicResource CardBrush}" 
                                         BorderBrush="{DynamicResource CardBorderBrush}" 
                                         BorderThickness="1" 
-                                        CornerRadius="7"
-                                        Padding="8,6"
+                                        CornerRadius="6"
+                                        Padding="8,4"
                                         SnapsToDevicePixels="True"
                                         UseLayoutRounding="True">
                                     <Grid>
@@ -679,13 +681,21 @@
                                                                                   Foreground="{DynamicResource Brush950}"
                                                                                   x:Name="GroupIcon" />
                                                                 
-                                                                <TextBlock Grid.Column="2"
-                                                                         x:Name="GroupNameText"
-                                                                         FontWeight="SemiBold" 
-                                                                         FontSize="12"
-                                                                         Foreground="{DynamicResource Brush900}"
-                                                                         Text="{Binding Name}"
-                                                                         VerticalAlignment="Center" />
+                                                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" ClipToBounds="True">
+                                                                    <TextBlock x:Name="GroupNameText"
+                                                                               FontWeight="SemiBold" 
+                                                                               FontSize="12"
+                                                                               Foreground="{DynamicResource Brush900}"
+                                                                               Text="{Binding Name}"
+                                                                               VerticalAlignment="Center" />
+                                                                    <TextBlock x:Name="GroupDescriptionText"
+                                                                               Margin="6,0,0,0"
+                                                                               FontSize="11.5"
+                                                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               Text="{Binding Name, Converter={StaticResource CategoryDescriptionConverter}}"
+                                                                               VerticalAlignment="Center" />
+                                                                </StackPanel>
                                                                 
                                                                 <Border Grid.Column="3"
                                                                        x:Name="CountPill"
@@ -697,17 +707,24 @@
                                                                        Margin="6,0,0,0"
                                                                        VerticalAlignment="Center">
                                                                     <TextBlock x:Name="GroupCountText"
-                                                                             Text="{Binding ItemCount}" 
+                                                                             ToolTip="Male · Female" 
                                                                              FontSize="9.5"
                                                                              FontWeight="SemiBold"
-                                                                             Foreground="{DynamicResource AccentTextBrush}" />
+                                                                             Foreground="{DynamicResource AccentTextBrush}" >
+                                                                        <TextBlock.Text>
+                                                                            <MultiBinding Converter="{StaticResource GroupSexCountConverter}">
+                                                                                <Binding Path="Items" />
+                                                                                <Binding Path="ItemCount" />
+                                                                            </MultiBinding>
+                                                                        </TextBlock.Text>
+                                                                    </TextBlock>
                                                                 </Border>
                                                             </Grid>
                                                         </Border>
                                                     </Grid>
                                                 </Expander.Header>
                                                 <Expander.Content>
-                                                    <ItemsPresenter Margin="0,2,0,4" />
+                                                    <ItemsPresenter Margin="16,0,0,6" />
                                                 </Expander.Content>
                                             </Expander>
                                             
@@ -725,44 +742,39 @@
                                             </ItemsPresenter>
                                         </StackPanel>
                                         <ControlTemplate.Triggers>
-                                            <!-- Category headers (Tops · jbib, Undershirts · accs ...): clean, tappable section rows -->
+                                            <!-- DurtyCloth-style category tree rows: "Undershirt [accs] (Shirts worn under tops)   0M · 69F" -->
                                             <DataTrigger Binding="{Binding IsPrimaryGroupingByTypeName, ElementName=MyDrawableList}" Value="True">
-                                                <Setter TargetName="GroupExpander" Property="Margin" Value="0,0,0,0" />
+                                                <Setter TargetName="GroupExpander" Property="Margin" Value="0" />
                                                 <Setter TargetName="GroupShadow" Property="Visibility" Value="Collapsed" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="Background" Value="{DynamicResource CardBrush}" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="CornerRadius" Value="8" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="Padding" Value="10,8" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="Margin" Value="0,0,6,4" />
-                                                <Setter TargetName="GroupIcon" Property="Kind" Value="TshirtCrew" />
-                                                <Setter TargetName="GroupIcon" Property="Height" Value="15" />
-                                                <Setter TargetName="GroupIcon" Property="Width" Value="15" />
-                                                <Setter TargetName="GroupIcon" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-                                                <Setter TargetName="ExpandArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z" />
-                                                <Setter TargetName="ExpandArrow" Property="Fill" Value="{DynamicResource TextTertiaryBrush}" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="Background" Value="Transparent" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="BorderBrush" Value="Transparent" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="CornerRadius" Value="6" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="Padding" Value="6,7" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="Margin" Value="0,0,6,1" />
+                                                <Setter TargetName="GroupIcon" Property="Visibility" Value="Collapsed" />
+                                                <Setter TargetName="ExpandArrow" Property="Data" Value="M 0 0 L 4.5 4.5 L 0 9 Z" />
+                                                <Setter TargetName="ExpandArrow" Property="Margin" Value="2,0,10,0" />
+                                                <Setter TargetName="ExpandArrow" Property="Fill" Value="{DynamicResource TextSecondaryBrush}" />
                                                 <Setter TargetName="GroupNameText" Property="FontWeight" Value="SemiBold" />
                                                 <Setter TargetName="GroupNameText" Property="FontSize" Value="12.5" />
                                                 <Setter TargetName="GroupNameText" Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-                                                <Setter TargetName="CountPill" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                                <Setter TargetName="CountPill" Property="Background" Value="Transparent" />
                                                 <Setter TargetName="CountPill" Property="BorderBrush" Value="Transparent" />
-                                                <Setter TargetName="CountPill" Property="CornerRadius" Value="9" />
-                                                <Setter TargetName="CountPill" Property="Padding" Value="7,1" />
-                                                <Setter TargetName="CountPill" Property="Margin" Value="6,0,0,0" />
-                                                <Setter TargetName="GroupCountText" Property="FontSize" Value="11" />
+                                                <Setter TargetName="CountPill" Property="Padding" Value="0" />
+                                                <Setter TargetName="CountPill" Property="Margin" Value="8,0,2,0" />
+                                                <Setter TargetName="GroupCountText" Property="FontSize" Value="11.5" />
+                                                <Setter TargetName="GroupCountText" Property="FontWeight" Value="Medium" />
                                                 <Setter TargetName="GroupCountText" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                             </DataTrigger>
 
                                             <!-- Hover -->
                                             <Trigger SourceName="HeaderWrapper" Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="GroupHeaderBorder" Property="Background" Value="{DynamicResource Brush100}" />
-                                                <Setter TargetName="GroupHeaderBorder" Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="BorderBrush" Value="Transparent" />
                                                 <Setter TargetName="GroupHeaderBorder" Property="BorderThickness" Value="1" />
                                                 <Setter TargetName="GroupIcon" Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                                 <Setter TargetName="GroupNameText" Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                                 <Setter TargetName="ExpandArrow" Property="Fill" Value="{DynamicResource AccentBrush}" />
-                                                <Setter TargetName="CountPill" Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
-                                                <Setter TargetName="CountPill" Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
-                                                <Setter TargetName="GroupCountText" Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
                                                 <Setter TargetName="GroupShadow" Property="Opacity" Value="0.18" />
                                             </Trigger>
                                             
@@ -773,7 +785,7 @@
                                                         <Storyboard>
                                                             <DoubleAnimation Storyboard.TargetName="ArrowRotation"
                                                                            Storyboard.TargetProperty="Angle"
-                                                                           To="180"
+                                                                           To="90"
                                                                            Duration="0:0:0.2">
                                                                 <DoubleAnimation.EasingFunction>
                                                                     <CubicEase EasingMode="EaseOut"/>
@@ -822,7 +834,7 @@
                                                     <Condition Binding="{Binding IsPrimaryGroupingByTypeName, ElementName=MyDrawableList}" Value="True" />
                                                     <Condition Binding="{Binding IsExpanded, ElementName=GroupExpander}" Value="False" />
                                                 </MultiDataTrigger.Conditions>
-                                                <Setter TargetName="GroupHeaderBorder" Property="Margin" Value="0,0,6,4" />
+                                                <Setter TargetName="GroupHeaderBorder" Property="Margin" Value="0,0,6,1" />
                                             </MultiDataTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
