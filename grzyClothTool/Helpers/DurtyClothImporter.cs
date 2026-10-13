@@ -129,7 +129,7 @@ public static class DurtyClothImporter
             }
         }
 
-        var importable = project.Clothes.Count(c => c.IsDummy || Resolve(index, c.MainPath) != null);
+        var importable = project.Clothes.Count(c => !c.IsDummy && Resolve(index, c.MainPath) != null);
         var setup = ProjectSetupDialog.ShowForDurtyClothImport(owner, SanitizeName(project.Name), importable);
         if (!setup.Confirmed)
         {
@@ -177,8 +177,7 @@ public static class DurtyClothImporter
 
                 if (cloth.IsDummy)
                 {
-                    drawables.Add(new GDrawableReserved(cloth.Sex, cloth.IsProp, cloth.DrawableType, 0));
-                    continue;
+                    continue; // DurtyCloth dummy slots are not imported as reserved drawables
                 }
 
                 var ydd = Resolve(index, cloth.MainPath);

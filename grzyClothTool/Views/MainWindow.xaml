@@ -163,6 +163,12 @@
                                 <icons:MaterialIcon Kind="FileImportOutline" Style="{StaticResource MenuIcon}" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Remove _Reserved Slots" Click="RemoveReservedSlots_Click"
+                                  ToolTip="Delete all reserved (empty placeholder) drawables and renumber">
+                            <MenuItem.Icon>
+                                <icons:MaterialIcon Kind="TrashCanOutline" Style="{StaticResource MenuIcon}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="_Export Project…" Click="ExportProject_Click">
                             <MenuItem.Icon>
                                 <icons:MaterialIcon Kind="Export" Style="{StaticResource MenuIcon}" />

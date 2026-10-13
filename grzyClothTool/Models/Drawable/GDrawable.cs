@@ -627,29 +627,46 @@ public class GDrawable : INotifyPropertyChanged
         OnPropertyChanged(nameof(Name));
     }
 
+    /// <summary>
+    /// Moves this drawable to a different slot (type / sex / component-prop).
+    /// No reserved placeholder is left behind: the old category is renumbered to close the gap
+    /// and the drawable takes the next free number in its new category.
+    /// </summary>
+    private void MoveToNewSlot(Action applyChange)
+    {
+        var manager = MainWindow.AddonManager;
+        var addon = manager.Addons.FirstOrDefault(a => a.Drawables.Contains(this)) ?? manager.SelectedAddon;
+
+        DuplicateDetector.UnregisterDrawable(this);
+        addon?.Drawables.Remove(this);
+
+        applyChange();
+
+        manager.AddDrawable(this);
+        manager.Addons.Sort(true);
+        SaveHelper.SetUnsavedChanges(true);
+    }
+
     public void ChangeDrawableType(string newType)
     {
         var newTypeNumeric = EnumHelper.GetValue(newType, IsProp);
-        var reserved = new GDrawableReserved(Sex, IsProp, TypeNumeric, Number);
-        var index = MainWindow.AddonManager.SelectedAddon.Drawables.IndexOf(this);
+        if (newTypeNumeric == TypeNumeric)
+        {
+            return;
+        }
 
-        DuplicateDetector.UnregisterDrawable(this);
-
-        // change drawable to new type
-        TypeNumeric = newTypeNumeric;
-
-        // replace drawable with reserved in the same place
-        MainWindow.AddonManager.SelectedAddon.Drawables[index] = reserved;
-
-        // re-add changed drawable
-        MainWindow.AddonManager.AddDrawable(this);
-        MainWindow.AddonManager.Addons.Sort(true);
+        MoveToNewSlot(() =>
+        {
+            TypeNumeric = newTypeNumeric;
+            _typeName = null;
+            OnPropertyChanged(nameof(TypeName));
+            OnPropertyChanged(nameof(AvailableAudioList));
+        });
     }
 
     /// <summary>
     /// Converts this drawable between component and prop (DurtyCloth-style "cloth type").
-    /// The old slot is kept as a reserved placeholder so numbering of other drawables does not shift,
-    /// exactly like a type or sex change.
+    /// No reserved placeholder is left behind.
     /// </summary>
     public void ChangeDrawableKind(bool toProp, string? newType = null)
     {
@@ -658,18 +675,15 @@ public class GDrawable : INotifyPropertyChanged
             return;
         }
 
-        var addon = MainWindow.AddonManager.Addons.FirstOrDefault(a => a.Drawables.Contains(this))
-                    ?? MainWindow.AddonManager.SelectedAddon;
-        var index = addon?.Drawables.IndexOf(this) ?? -1;
-        if (index < 0)
-        {
-            return;
-        }
+        MoveToNewSlot(() => ApplyKindChange(toProp, newType));
 
-        var reserved = new GDrawableReserved(Sex, IsProp, TypeNumeric, Number);
+        OnPropertyChanged(nameof(TypeName));
+        OnPropertyChanged(nameof(AvailableTypes));
+        OnPropertyChanged(nameof(AvailableAudioList));
+    }
 
-        DuplicateDetector.UnregisterDrawable(this);
-
+    private void ApplyKindChange(bool toProp, string? newType)
+    {
         var newTypeNumeric = !string.IsNullOrEmpty(newType)
             ? EnumHelper.GetValue(newType, toProp)
             : GetDefaultTypeForKind(toProp, TypeNumeric);
@@ -692,17 +706,6 @@ public class GDrawable : INotifyPropertyChanged
             txt.TypeNumeric = newTypeNumeric;
         }
 
-        // keep the old slot so the numbers of following drawables do not change
-        addon!.Drawables[index] = reserved;
-
-        // re-add as the new kind (gets a fresh number for its new type)
-        MainWindow.AddonManager.AddDrawable(this);
-        MainWindow.AddonManager.Addons.Sort(true);
-
-        OnPropertyChanged(nameof(TypeName));
-        OnPropertyChanged(nameof(AvailableTypes));
-        OnPropertyChanged(nameof(AvailableAudioList));
-        SaveHelper.SetUnsavedChanges(true);
     }
 
     private static int GetDefaultTypeForKind(bool toProp, int currentTypeNumeric)
@@ -731,20 +734,17 @@ public class GDrawable : INotifyPropertyChanged
     {
         // transform new sex to enum
         var newSexEnum = Enum.Parse<Enums.SexType>(newSex);
-        var reserved = new GDrawableReserved(Sex, IsProp, TypeNumeric, Number);
-        var index = MainWindow.AddonManager.SelectedAddon.Drawables.IndexOf(this);
-    
-        DuplicateDetector.UnregisterDrawable(this);
+        if (newSexEnum == Sex)
+        {
+            return;
+        }
 
-        // change drawable sex
-        Sex = newSexEnum;
-
-        // replace drawable with reserved in the same place
-        MainWindow.AddonManager.SelectedAddon.Drawables[index] = reserved;
-
-        // re-add changed drawable
-        MainWindow.AddonManager.AddDrawable(this);
-        MainWindow.AddonManager.Addons.Sort(true);
+        MoveToNewSlot(() =>
+        {
+            Sex = newSexEnum;
+            _sexName = null;
+            OnPropertyChanged(nameof(SexName));
+        });
     }
 
     private void OnTexturesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

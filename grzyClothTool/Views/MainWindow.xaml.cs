@@ -549,6 +549,28 @@ namespace grzyClothTool
             }
         }
 
+        private void RemoveReservedSlots_Click(object sender, RoutedEventArgs e)
+        {
+            var count = AddonManager.Addons.Sum(a => a.Drawables.Count(d => d.IsReserved));
+            if (count == 0)
+            {
+                LogHelper.Log("No reserved slots in this project.", LogType.Info);
+                return;
+            }
+
+            var result = Controls.CustomMessageBox.Show(
+                $"Remove {count} reserved slot(s)? Drawables after them will be renumbered.",
+                "Remove Reserved Slots",
+                Controls.CustomMessageBox.CustomMessageBoxButtons.OKCancel,
+                Controls.CustomMessageBox.CustomMessageBoxIcon.Warning);
+
+            if (result == Controls.CustomMessageBox.CustomMessageBoxResult.OK)
+            {
+                var removed = AddonManager.RemoveReservedSlots();
+                LogHelper.Log($"Removed {removed} reserved slot(s).", LogType.Info);
+            }
+        }
+
         private async void ImportDurtyCloth_Click(object sender, RoutedEventArgs e)
         {
             await DurtyClothImporter.ImportWithPickerAsync(this);

@@ -842,6 +842,41 @@ namespace grzyClothTool.Models
         /// Used by batch processing after duplicates have already been handled.
         /// Batch callers pass markUnsaved: false and set the unsaved flag once at the end.
         /// </summary>
+        /// <summary>Removes every reserved placeholder slot and renumbers. Returns how many were removed.</summary>
+        public int RemoveReservedSlots()
+        {
+            int removed = 0;
+            lock (AddonsLock)
+            {
+                foreach (var addon in Addons)
+                {
+                    var reserved = addon.Drawables.Where(d => d.IsReserved).ToList();
+                    foreach (var drawable in reserved)
+                    {
+                        addon.Drawables.Remove(drawable);
+                        removed++;
+                    }
+                }
+
+                foreach (var empty in Addons.Where(a => a.Drawables.Count == 0).ToList())
+                {
+                    if (Addons.Count > 1)
+                    {
+                        Addons.Remove(empty);
+                    }
+                }
+
+                Addons.Sort(true);
+            }
+
+            if (removed > 0)
+            {
+                SaveHelper.SetUnsavedChanges(true);
+            }
+
+            return removed;
+        }
+
         /// <summary>
         /// Adds already-built drawables in order (numbers assigned per type/sex, new addons
         /// created at 128). No duplicate prompts - used by project importers.
