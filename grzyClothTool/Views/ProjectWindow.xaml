@@ -60,49 +60,32 @@ mc:Ignorable="d">
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         </Style>
 
-        <ContextMenu x:Key="AddDrawablesMenu" Placement="Bottom">
+        <ContextMenu x:Key="AddMaleMenu">
             <MenuItem Header="Male components…" Click="Add_MaleComponents">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="HumanMale" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><icons:MaterialIcon Kind="TshirtCrew" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="Male props…" Click="Add_MaleProps">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="HumanMale" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><icons:MaterialIcon Kind="HatFedora" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
+            <MenuItem Header="Male folder…" Click="Add_DrawableMaleFolder">
+                <MenuItem.Icon><icons:MaterialIcon Kind="FolderOutline" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Auto-detect folder…" Click="Add_DrawableAutoFolder" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="AddFemaleMenu">
             <MenuItem Header="Female components…" Click="Add_FemaleComponents">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="HumanFemale" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><icons:MaterialIcon Kind="TshirtCrew" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="Female props…" Click="Add_FemaleProps">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="HumanFemale" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
+                <MenuItem.Icon><icons:MaterialIcon Kind="HatFedora" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Header="Auto-detect from files…" Click="Add_DrawableAutoFile">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="FileImportOutline" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
+            <MenuItem Header="Female folder…" Click="Add_DrawableFemaleFolder">
+                <MenuItem.Icon><icons:MaterialIcon Kind="FolderOutline" Style="{StaticResource AddMenuIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="From folder">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="FolderOutline" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
-                <MenuItem Header="Auto-detect…" Click="Add_DrawableAutoFolder" />
-                <MenuItem Header="As male…" Click="Add_DrawableMaleFolder" />
-                <MenuItem Header="As female…" Click="Add_DrawableFemaleFolder" />
-            </MenuItem>
-            <MenuItem Header="Files with gender only">
-                <MenuItem.Icon>
-                    <icons:MaterialIcon Kind="TshirtCrew" Style="{StaticResource AddMenuIcon}" />
-                </MenuItem.Icon>
-                <MenuItem Header="As male…" Click="Add_DrawableMaleFile" />
-                <MenuItem Header="As female…" Click="Add_DrawableFemaleFile" />
-            </MenuItem>
+            <MenuItem Header="Auto-detect folder…" Click="Add_DrawableAutoFolder" />
         </ContextMenu>
     </UserControl.Resources>
 
@@ -172,64 +155,16 @@ mc:Ignorable="d">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Sidebar header: title + add/delete -->
-                <Grid Grid.Row="0" Margin="14,12,12,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Drawables"
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextPrimaryBrush}"
-                               VerticalAlignment="Center" />
-
-                    <!-- Split button: click = auto-detect files, chevron = component/prop by gender -->
-                    <Border Grid.Column="1"
-                            Background="{DynamicResource ControlBrush}"
-                            BorderBrush="{DynamicResource ControlBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="7"
-                            Height="30">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource GhostButton}"
-                                    Padding="10,0"
-                                    AutomationProperties.Name="ADD DRAWABLES"
-                                    AutomationProperties.AutomationId="ADD DRAWABLES"
-                                    ToolTip="Add drawables (type and gender auto-detected from file names)"
-                                    Click="Add_DrawableAutoFile">
-                                <StackPanel Orientation="Horizontal">
-                                    <icons:MaterialIcon Kind="Plus" Width="15" Height="15" Margin="0,0,5,0" />
-                                    <TextBlock Text="Add" FontSize="12" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                            <Border Width="1" Margin="0,6" Background="{DynamicResource ControlBorderBrush}" />
-                            <Button x:Name="AddMenuButton"
-                                    Style="{StaticResource GhostButton}"
-                                    Padding="8,0"
-                                    AutomationProperties.Name="Add options"
-                                    ToolTip="Add as component or prop, male or female"
-                                    ContextMenu="{StaticResource AddDrawablesMenu}"
-                                    Click="AddMenuButton_Click">
-                                <Path Data="M 0 0 L 4.5 4.5 L 9 0" Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6" Width="9" Height="5" Stretch="Fill" />
-                            </Button>
-                        </StackPanel>
-                    </Border>
-
-                    <Button Grid.Column="2"
-                            Style="{StaticResource IconButton}"
-                            Width="30" Height="30"
-                            Margin="6,0,0,0"
-                            ToolTip="Delete selected (Del)"
-                            AutomationProperties.Name="Delete selected drawable"
-                            Click="Delete_SelectedDrawable">
-                        <icons:MaterialIcon Kind="TrashCanOutline" Width="16" Height="16" />
-                    </Button>
-                </Grid>
+                <!-- Sidebar header -->
+                <TextBlock Grid.Row="0"
+                           Text="Drawables"
+                           Margin="14,14,12,10"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TabControl x:Name="AddonTabControl"
                             Grid.Row="1"
@@ -381,7 +316,7 @@ mc:Ignorable="d">
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <TextBlock Text="or use Add to choose component or prop."
+                                    <TextBlock Text="or use Add Male / Add Female below."
                                                Margin="0,4,0,0"
                                                FontSize="12"
                                                HorizontalAlignment="Center"
@@ -391,6 +326,58 @@ mc:Ignorable="d">
                         </DataTemplate>
                     </TabControl.ContentTemplate>
                 </TabControl>
+
+                <!-- Bottom action bar (DurtyCloth-style): Add Male / Add Female.
+                     Type & component/prop are detected from file names; right-click for more. -->
+                <Border Grid.Row="2"
+                        BorderBrush="{DynamicResource DividerBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="12,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Height="36"
+                                AutomationProperties.Name="Add Male"
+                                AutomationProperties.AutomationId="ADD MALE"
+                                ToolTip="Add male drawables (.ydd). Right-click for components, props or a folder."
+                                ContextMenu="{StaticResource AddMaleMenu}"
+                                Click="Add_MaleClick">
+                            <StackPanel Orientation="Horizontal">
+                                <icons:MaterialIcon Kind="HumanMale" Width="17" Height="17" Margin="0,0,6,0" Foreground="{DynamicResource AccentBrush}" />
+                                <TextBlock Text="Add Male" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Grid.Column="2"
+                                Height="36"
+                                AutomationProperties.Name="Add Female"
+                                AutomationProperties.AutomationId="ADD FEMALE"
+                                ToolTip="Add female drawables (.ydd). Right-click for components, props or a folder."
+                                ContextMenu="{StaticResource AddFemaleMenu}"
+                                Click="Add_FemaleClick">
+                            <StackPanel Orientation="Horizontal">
+                                <icons:MaterialIcon Kind="HumanFemale" Width="17" Height="17" Margin="0,0,6,0" Foreground="{DynamicResource PropBrush}" />
+                                <TextBlock Text="Add Female" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Grid.Column="3"
+                                Style="{StaticResource IconButton}"
+                                Width="36" Height="36"
+                                Margin="8,0,0,0"
+                                ToolTip="Delete selected (Del)"
+                                AutomationProperties.Name="Delete selected drawable"
+                                Click="Delete_SelectedDrawable">
+                            <icons:MaterialIcon Kind="TrashCanOutline" Width="17" Height="17" />
+                        </Button>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
 

@@ -143,6 +143,24 @@ public class SaveBackupFile
     {
         if (!HasUnsavedChanges || SavingPaused) return;
 
+        var manager = MainWindow.AddonManager;
+        if (await SaveManagerAsync(manager))
+        {
+            // only clear the flag if the user hasn't switched to another tab meanwhile
+            if (ReferenceEquals(manager, MainWindow.AddonManager))
+            {
+                SetUnsavedChanges(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Saves a specific project (the active tab or a background tab). Returns true on success.
+    /// </summary>
+    public static async Task<bool> SaveManagerAsync(AddonManager manager)
+    {
+        if (manager == null) return false;
+
         await _semaphore.WaitAsync();
 
         try
@@ -154,15 +172,15 @@ public class SaveBackupFile
             try
             {
                 var mainProjectsFolder = PersistentSettingsHelper.Instance.MainProjectsFolder;
-                var projectName = MainWindow.AddonManager.ProjectName;
-                var isExternalProject = MainWindow.AddonManager.IsExternalProject;
+                var projectName = manager.ProjectName;
+                var isExternalProject = manager.IsExternalProject;
 
                 if (string.IsNullOrEmpty(mainProjectsFolder) ||
                     string.IsNullOrEmpty(projectName) ||
                     !Directory.Exists(mainProjectsFolder))
                 {
                     LogHelper.Log("Could not auto-save: Project folder not configured or project name not set", Views.LogType.Warning);
-                    return;
+                    return false;
                 }
 
                 var projectFolder = Path.Combine(mainProjectsFolder, projectName);
@@ -171,15 +189,16 @@ public class SaveBackupFile
                 var saveFileName = GetSaveFileName(isExternalProject);
                 var autoSavePath = Path.Combine(projectFolder, saveFileName);
                 await RotateSaveBackupAsync(autoSavePath);
-                await WriteSaveFileAtomicallyAsync(autoSavePath);
+                await WriteSaveFileAtomicallyAsync(autoSavePath, manager);
 
-                LogHelper.Log($"Auto-saved to {autoSavePath} in {timer.ElapsedMilliseconds}ms");
+                LogHelper.Log($"Saved '{projectName}' to {autoSavePath} in {timer.ElapsedMilliseconds}ms");
                 SaveCreated?.Invoke();
-                SetUnsavedChanges(false);
+                return true;
             }
             catch (Exception ex)
             {
                 LogHelper.Log($"Auto-save failed: {ex.Message}", Views.LogType.Error);
+                return false;
             }
         }
         finally
@@ -191,6 +210,12 @@ public class SaveBackupFile
     public static void SetUnsavedChanges(bool status)
     {
         HasUnsavedChanges = status;
+
+        var activeTab = ProjectTabs.Active;
+        if (activeTab != null)
+        {
+            MainWindow.Instance?.Dispatcher.InvokeAsync(() => activeTab.HasUnsavedChanges = status);
+        }
 
         MainWindow.Instance.Dispatcher.Invoke(() =>
         {
@@ -428,7 +453,7 @@ public class SaveBackupFile
         }
     }
 
-    private static async Task WriteSaveFileAtomicallyAsync(string saveFilePath)
+    private static async Task WriteSaveFileAtomicallyAsync(string saveFilePath, AddonManager manager)
     {
         var projectFolder = Path.GetDirectoryName(saveFilePath) ?? throw new InvalidOperationException("Save file has no parent folder.");
         var tempPath = Path.Combine(projectFolder, $"{Path.GetFileName(saveFilePath)}.{Guid.NewGuid():N}.tmp");
@@ -440,13 +465,9 @@ public class SaveBackupFile
             {
                 lock (AddonManager.AddonsLock)
                 {
-                    MainWindow.AddonManager.Groups.Clear();
-                    foreach (var group in GroupManager.Instance.Groups)
-                    {
-                        MainWindow.AddonManager.Groups.Add(group);
-                    }
-
-                    JsonSerializer.Serialize(stream, MainWindow.AddonManager, SerializerOptions);
+                    // Groups live on the manager itself (GroupManager reads them from there),
+                    // so the manager is serialized as-is.
+                    JsonSerializer.Serialize(stream, manager, SerializerOptions);
                 }
             }
 

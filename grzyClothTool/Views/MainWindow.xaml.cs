@@ -33,6 +33,14 @@ namespace grzyClothTool
         private static AddonManager _addonManager;
         public static AddonManager AddonManager => _addonManager;
 
+        /// <summary>Open project tabs (bound by the tab strip).</summary>
+        public static System.Collections.ObjectModel.ObservableCollection<ProjectSession> ProjectSessions => ProjectTabs.Sessions;
+
+        internal static void SetActiveAddonManager(AddonManager manager)
+        {
+            _addonManager = manager;
+        }
+
         private readonly static Dictionary<string, string> TempFoldersNames = new()
         {
             { "import", "grzyClothTool_import" },
@@ -48,7 +56,7 @@ namespace grzyClothTool
             _ = TelemetryHelper.LogSession(true);
 
             _instance = this;
-            _addonManager = new AddonManager();
+            _addonManager = ProjectTabs.Initialize();
             SaveHelper.AutoSaveProgress += OnAutoSaveProgress;
             SaveHelper.RemainingSecondsChanged += OnRemainingSecondsChanged;
 
@@ -112,6 +120,21 @@ namespace grzyClothTool
             {
                 e.Handled = true;
                 await SaveAsync();
+            }
+            else if (e.Key == Key.T && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                ProjectTabs.NewTab();
+            }
+            else if (e.Key == Key.W && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                await ProjectTabs.CloseAsync(ProjectTabs.Active);
+            }
+            else if (e.Key == Key.Tab && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                ProjectTabs.ActivateNext((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? -1 : 1);
             }
         }
 
@@ -253,32 +276,46 @@ namespace grzyClothTool
 
         public void HomeScreen_Click(object sender, RoutedEventArgs e)
         {
-            if (!SaveHelper.CheckUnsavedChangesMessage())
+            // With project tabs, "home" is simply a new tab - the current project stays open.
+            ProjectTabs.NewTab();
+        }
+
+        private void NewTab_Click(object sender, RoutedEventArgs e)
+        {
+            ProjectTabs.NewTab();
+        }
+
+        private void ProjectTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement { DataContext: ProjectSession session })
             {
-                return;
+                ProjectTabs.Activate(session);
             }
+        }
 
-            AddonManager.Addons.Clear();
-            AddonManager.ProjectName = string.Empty;
-            AddonManager.IsExternalProject = false;
-            AddonManager.Groups.Clear();
-            AddonManager.Tags.Clear();
-            AddonManager.MoveMenuItems.Clear();
-            AddonManager.SelectedAddon = null;
-            AddonManager.IsPreviewEnabled = false;
+        private async void CloseProjectTab_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            if (sender is FrameworkElement { DataContext: ProjectSession session })
+            {
+                await ProjectTabs.CloseAsync(session);
+            }
+        }
 
-            DuplicateDetector.Clear();
-
-            SaveHelper.SetUnsavedChanges(false);
-
-            _navigationHelper.Navigate("Home");
-
-            LogHelper.Log("Cleared data, moved to home screen", LogType.Info);
+        private async void ProjectTab_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // middle-click closes a tab, like a browser
+            if (e.ChangedButton == MouseButton.Middle && sender is FrameworkElement { DataContext: ProjectSession session })
+            {
+                e.Handled = true;
+                await ProjectTabs.CloseAsync(session);
+            }
         }
 
         public void OpenAddon_Click(object sender, RoutedEventArgs e)
         {
-            _ = OpenAddonAsync();
+            // opens in its own tab; the current project stays open
+            _ = ProjectTabs.OpenInNewTabAsync(() => OpenAddonAsync(true));
         }
 
         public void AddAddon_Click(object sender, RoutedEventArgs e)
@@ -288,11 +325,6 @@ namespace grzyClothTool
 
         public async Task<bool> OpenAddonAsync(bool shouldSetProjectName = false)
         {
-            if (!SaveHelper.CheckUnsavedChangesMessage())
-            {
-                return false;
-            }
-
             OpenFileDialog metaFiles = new()
             {
                 Title = "Select .meta file(s)",
@@ -626,7 +658,18 @@ namespace grzyClothTool
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!SaveHelper.CheckUnsavedChangesMessage())
+            if (!ProjectTabs.AnyUnsavedChanges())
+            {
+                return;
+            }
+
+            var result = Controls.CustomMessageBox.Show(
+                "One or more open projects have unsaved changes. Close anyway?",
+                "Unsaved changes",
+                Controls.CustomMessageBox.CustomMessageBoxButtons.OKCancel,
+                Controls.CustomMessageBox.CustomMessageBoxIcon.Warning);
+
+            if (result != Controls.CustomMessageBox.CustomMessageBoxResult.OK)
             {
                 e.Cancel = true;
             }

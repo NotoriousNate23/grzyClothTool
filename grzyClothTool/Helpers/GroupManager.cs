@@ -42,6 +42,12 @@ public class GroupManager : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Call after the active project tab changes so bindings re-read Groups.</summary>
+    public void NotifyProjectChanged()
+    {
+        OnPropertyChanged(nameof(Groups));
+    }
+
     protected void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

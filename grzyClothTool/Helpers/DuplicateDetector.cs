@@ -10,7 +10,23 @@ namespace grzyClothTool.Helpers;
 
 public static class DuplicateDetector
 {
-    private static readonly Dictionary<string, List<GDrawable>> _drawableDuplicateGroups = new();
+    private static Dictionary<string, List<GDrawable>> _drawableDuplicateGroups = new();
+
+    /// <summary>Detaches the current project's duplicate index (used when switching project tabs).</summary>
+    public static Dictionary<string, List<GDrawable>> DetachState()
+    {
+        var state = _drawableDuplicateGroups;
+        _drawableDuplicateGroups = new();
+        Version++;
+        return state;
+    }
+
+    /// <summary>Restores a project's duplicate index (used when switching project tabs).</summary>
+    public static void AttachState(Dictionary<string, List<GDrawable>> state)
+    {
+        _drawableDuplicateGroups = state ?? new();
+        Version++;
+    }
 
     public static string ComputeDrawableHash(GDrawable drawable)
     {

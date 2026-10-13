@@ -333,6 +333,15 @@ namespace grzyClothTool.Views
                     return;
                 }
 
+                if (grzyClothTool.Models.ProjectTabs.TryActivateExistingByName(projectName))
+                {
+                    Show($"'{projectName}' is already open in a tab, so it was not overwritten.",
+                         "Project Already Open",
+                         CustomMessageBoxButtons.OKOnly,
+                         CustomMessageBoxIcon.Information);
+                    return;
+                }
+
                 var projectFolder = Path.Combine(mainProjectsFolder, projectName);
 
                 if (Directory.Exists(projectFolder))
@@ -415,7 +424,7 @@ namespace grzyClothTool.Views
 
                 if (openFileDialog.ShowDialog() == true)
                 {
-                    if (!SaveHelper.CheckUnsavedChangesMessage())
+                    if (grzyClothTool.Models.ProjectTabs.TryActivateExisting(openFileDialog.FileName))
                     {
                         return;
                     }
@@ -454,7 +463,8 @@ namespace grzyClothTool.Views
                         return;
                     }
 
-                    if (!SaveHelper.CheckUnsavedChangesMessage())
+                    // already open in another tab? just switch to it
+                    if (grzyClothTool.Models.ProjectTabs.TryActivateExisting(filePath))
                     {
                         return;
                     }

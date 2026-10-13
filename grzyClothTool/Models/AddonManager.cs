@@ -124,6 +124,19 @@ namespace grzyClothTool.Models
             _drawableProcessingTask = Task.Run(ProcessDrawableQueue);
         }
 
+        /// <summary>Stops the background import worker when a project tab is closed.</summary>
+        public void Shutdown()
+        {
+            try
+            {
+                _drawableQueue.CompleteAdding();
+            }
+            catch (Exception)
+            {
+                // already completed
+            }
+        }
+
         public void CreateAddon()
         {
             var name = "Addon " + (Addons.Count + 1);

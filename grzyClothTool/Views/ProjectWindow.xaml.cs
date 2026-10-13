@@ -64,12 +64,13 @@ namespace grzyClothTool.Views
             
             Loaded += ProjectWindow_Loaded;
             Unloaded += ProjectWindow_Unloaded;
-            
-            PreviewWindowHost.Preview3DAvailabilityChanged += OnPreview3DAvailabilityChanged;
         }
 
         private void ProjectWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // views are cached per project tab and re-loaded on every switch
+            PreviewWindowHost.Preview3DAvailabilityChanged -= OnPreview3DAvailabilityChanged;
+            PreviewWindowHost.Preview3DAvailabilityChanged += OnPreview3DAvailabilityChanged;
             UpdatePreviewButtonState();
         }
 
@@ -201,6 +202,18 @@ namespace grzyClothTool.Views
         {
             e.Handled = true;
             await SelectDrawableFilesAsync(Enums.SexType.male);
+        }
+
+        private async void Add_MaleClick(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.male);
+        }
+
+        private async void Add_FemaleClick(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            await SelectDrawableFilesAsync(Enums.SexType.female);
         }
 
         private void AddMenuButton_Click(object sender, RoutedEventArgs e)

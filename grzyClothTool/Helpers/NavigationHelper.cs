@@ -27,7 +27,6 @@ public class NavigationHelper : INotifyPropertyChanged
 
     public NavigationHelper()
     {
-        CurrentPage = new ProjectWindow();
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string name = null)
@@ -42,6 +41,18 @@ public class NavigationHelper : INotifyPropertyChanged
 
     public void Navigate(string pageKey)
     {
+        // Every project tab owns its own cached view, so switching tabs never rebuilds the UI
+        if (pageKey == "Project")
+        {
+            MainWindow.Instance.MainWindowContentControl.Content = grzyClothTool.Models.ProjectTabs.GetOrCreateActiveView();
+            return;
+        }
+
+        if (pageKey == "Home")
+        {
+            grzyClothTool.Models.ProjectTabs.Active?.RefreshTitle();
+        }
+
         if (_pageFactories.TryGetValue(pageKey, out var pageFactory))
         {
             if (!_pages.TryGetValue(pageKey, out UserControl page))
