@@ -5,6 +5,9 @@ on:
     branches: [ "**" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -21,8 +24,23 @@ jobs:
       - name: Publish grzyClothTool (self-contained win-x64)
         run: dotnet publish grzyClothTool/grzyClothTool.csproj -c Release -r win-x64 --self-contained true -o publish
 
+      - name: Zip
+        shell: bash
+        run: 7z a -tzip grzyClothTool-win-x64.zip ./publish/*
+
       - uses: actions/upload-artifact@v4
         with:
           name: grzyClothTool-win-x64
           path: publish/
           if-no-files-found: error
+
+      - name: Publish as public download (release "latest")
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest grzyClothTool-win-x64.zip \
+            --title "grzyClothTool (${GITHUB_REF_NAME})" \
+            --notes "Built from ${GITHUB_SHA::7}. Download, extract, run grzyClothTool.exe." \
+            --prerelease --target "$GITHUB_SHA"
