@@ -157,8 +157,14 @@
                                 <icons:MaterialIcon Kind="FileImportOutline" Style="{StaticResource MenuIcon}" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Import _DurtyCloth Project…" Click="ImportDurtyCloth_Click"
-                                  ToolTip="Open .dctproj files from DurtyCloth (each opens in its own tab)">
+                        <MenuItem Header="Import DurtyCloth _Folder…" Click="ImportDurtyClothFolder_Click"
+                                  ToolTip="Scan a DurtyCloth folder and import every project - even without the .dctproj file">
+                            <MenuItem.Icon>
+                                <icons:MaterialIcon Kind="FolderOutline" Style="{StaticResource MenuIcon}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Import _DurtyCloth Project File…" Click="ImportDurtyCloth_Click"
+                                  ToolTip="Open .dctproj / .durty-cloth.json files (each opens in its own tab)">
                             <MenuItem.Icon>
                                 <icons:MaterialIcon Kind="FileImportOutline" Style="{StaticResource MenuIcon}" />
                             </MenuItem.Icon>

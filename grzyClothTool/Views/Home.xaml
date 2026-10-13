@@ -141,11 +141,11 @@
                                     Height="38"
                                     Margin="0,8,0,0"
                                     MyBtnClickEvent="OpenSave_Click" />
-                    <c:CustomButton Label="Import DurtyCloth project"
+                    <c:CustomButton Label="Import from DurtyCloth"
                                     Image="SwapHorizontal"
                                     Height="38"
                                     Margin="0,8,0,0"
-                                    Tooltip="Open .dctproj files from DurtyCloth - each opens in its own tab"
+                                    Tooltip="Pick a DurtyCloth folder - every project inside is found, even without its .dctproj file"
                                     MyBtnClickEvent="ImportDurtyCloth_Click" />
 
                     <Border Style="{StaticResource CardBorder}" Margin="0,24,0,0" Padding="14,12">

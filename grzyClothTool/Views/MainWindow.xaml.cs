@@ -571,6 +571,11 @@ namespace grzyClothTool
             }
         }
 
+        private async void ImportDurtyClothFolder_Click(object sender, RoutedEventArgs e)
+        {
+            await DurtyClothImporter.ImportFolderAsync(this);
+        }
+
         private async void ImportDurtyCloth_Click(object sender, RoutedEventArgs e)
         {
             await DurtyClothImporter.ImportWithPickerAsync(this);

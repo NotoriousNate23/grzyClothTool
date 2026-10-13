@@ -413,7 +413,7 @@ namespace grzyClothTool.Views
 
         private async void ImportDurtyCloth_Click(object sender, RoutedEventArgs e)
         {
-            await DurtyClothImporter.ImportWithPickerAsync(Window.GetWindow(this));
+            await DurtyClothImporter.ImportFolderAsync(Window.GetWindow(this));
             LoadRecentProjects();
         }
 
