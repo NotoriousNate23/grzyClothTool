@@ -19,7 +19,7 @@
         FontSize="13"
         UseLayoutRounding="True"
         TextOptions.TextFormattingMode="Display"
-        Title="grzyClothTool" Height="900" Width="1440" MinWidth="1200" MinHeight="780"
+        Title="Nightfall Clothing" Height="900" Width="1440" MinWidth="1200" MinHeight="780"
         MouseDown="Window_MouseDown"
         Closed="Window_Closed"
         Closing="Window_Closing"
@@ -114,10 +114,10 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
-                    <Border Width="22" Height="22" CornerRadius="6" Background="{DynamicResource AccentBrush}">
-                        <icons:MaterialIcon Kind="TshirtCrew" Width="14" Height="14" Foreground="{DynamicResource OnAccentBrush}" />
-                    </Border>
-                    <TextBlock Text="grzyClothTool"
+                    <Image Width="24" Height="24"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Source="pack://application:,,,/grzyClothTool;component/Resources/grzyClothTool.png" />
+                    <TextBlock Text="Nightfall Clothing"
                                Margin="9,0,0,0"
                                FontWeight="SemiBold"
                                FontSize="13"

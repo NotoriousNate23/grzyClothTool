@@ -22,8 +22,8 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
-                <TextBlock x:Name="x" Padding="5" HorizontalAlignment="Center" FontSize="42" FontWeight="SemiBold" VerticalAlignment="Bottom" Foreground="{DynamicResource Brush100}" Text="grzyClothTool" />
-                <Image Width="350" Source="pack://application:,,,/grzyClothTool;component/Resources/grzyClothTool.png" />
+                <TextBlock x:Name="x" Padding="5" HorizontalAlignment="Center" FontSize="42" FontWeight="SemiBold" VerticalAlignment="Bottom" Foreground="{DynamicResource Brush100}" Text="Nightfall Clothing" />
+                <Image Width="160" Source="pack://application:,,,/grzyClothTool;component/Resources/grzyClothTool.png" />
             </StackPanel>
             <StackPanel Grid.Row="1" >
                 <TextBlock x:Name="updateTextBox" Padding="5" HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Bottom" Foreground="{DynamicResource Brush100}" Text="Loading..." />

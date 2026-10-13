@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:grzyClothTool.Views"
              xmlns:c="clr-namespace:grzyClothTool.Controls"
+             xmlns:app="clr-namespace:grzyClothTool"
              xmlns:icons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d"
              d:Background="white"
@@ -84,7 +85,15 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="grzyClothTool" Style="{StaticResource TitleText}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="44" Height="44" Margin="0,0,14,0"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Source="pack://application:,,,/grzyClothTool;component/Resources/grzyClothTool.png" />
+                        <TextBlock Text="Nightfall Clothing" Style="{StaticResource TitleText}" VerticalAlignment="Center" />
+                        <Border Style="{StaticResource PillBorder}" Margin="12,6,0,0">
+                            <TextBlock Text="{Binding Source={x:Static app:MainWindow.AppVersion}}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Border>
+                    </StackPanel>
                     <TextBlock Text="Build and manage GTA V addon clothing packs."
                                Margin="0,4,0,0"
                                FontSize="14"

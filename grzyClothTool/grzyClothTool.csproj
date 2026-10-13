@@ -6,7 +6,8 @@
 	  <UseWindowsForms>true</UseWindowsForms>
 	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	  <ApplicationIcon>Resources\grzyClothToolIcon.ico</ApplicationIcon>
-	  <FileVersion>1.3.0</FileVersion>
+	  <FileVersion>2.0.0</FileVersion>
+	  <Product>Nightfall Clothing</Product>
 	  
 	  <SelfContained>true</SelfContained>
 	  <PublishSingleFile>false</PublishSingleFile>

@@ -24,7 +24,7 @@ namespace grzyClothTool
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static string AppVersion => "Version: " + UpdateHelper.GetCurrentVersion();
+        public static string AppVersion => "v" + UpdateHelper.GetCurrentVersion();
         private static MainWindow _instance;
         public static MainWindow Instance => _instance;
         private static NavigationHelper _navigationHelper;
@@ -84,10 +84,8 @@ namespace grzyClothTool
 
             Dispatcher.BeginInvoke((Action)(async () =>
             {
-#if !DEBUG
-                App.splashScreen.AddMessage("Checking for updates...");
-                await UpdateHelper.CheckForUpdates();
-#endif
+                // Auto-update disabled: it pulls the original grzyClothTool from upstream
+                // and would replace this Nightfall Clothing build.
                 App.splashScreen.AddMessage("Starting app");
 
                 while (App.splashScreen.MessageQueueCount > 0)

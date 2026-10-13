@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterOwner"
         MouseDown="Window_MouseDown"
         Closing="Window_Closing"
-        Title="grzyClothTool - Build resource"
+        Title="Nightfall Clothing - Build resource"
         Background="{DynamicResource Brush50}"
         Height="550"
         Width="500">
